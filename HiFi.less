@@ -1,0 +1,303 @@
+*{
+    box-sizing: border-box;
+}
+body{
+    margin: 0;
+}
+.returnButton{
+    width: 2.34%;
+    height:64.28%;
+    object-fit: cover;
+    position: relative;
+    left: 1.25%;
+    top: 17.14%;
+}
+.logo{
+    width: 10.31%;
+    height: 42.86%;
+    position: relative;
+    left:2.13%;
+    top: 28.57%;
+}
+.logoTitle{
+    color:#005FCB;
+    position: relative;
+    left: 2.13%;
+    bottom: 6px;
+    align-self: end;
+    font-size: 0.73vw;
+    font-family: Microsoft YaHei;
+}
+.verticalBar{
+    width: 2px;
+    height: 31.43%;
+    background: #035AB0;
+    position: relative;
+    left: 3%;
+    top: 38.57%;
+}
+.deviceName{
+    font-size: 1.56vw;
+    font-family: Microsoft YaHei;
+    font-weight: bold;
+    color: #F5F5F5;
+    text-shadow: 0px 3px 3px rgba(22, 29, 54, 0.58);
+    position: relative;
+    left: 4%;
+    align-self: center;
+}
+.deviceNameSubscript{
+    font-size: .73vw;
+    font-family: Microsoft YaHei;
+    font-weight: 400;
+    color: #F5F5F5;
+    position: relative;
+    left: 5%;
+    bottom: 6px;
+    align-self: end;
+}
+.rightSideButton{
+    width: 2.34%;
+    height:64.28%;
+    object-fit: contain;
+    position: relative;
+    left: 62%;
+    top: 17.14%;
+    cursor: pointer;
+}
+.topSwitchBar{
+    width: 100%;
+    height: 3.89%;
+    position: relative;
+    display: grid; 
+    grid-template-columns: 6.1% auto 12.81%; 
+    grid-template-rows: 100%;
+    grid-template-areas: 
+    ". . c";
+    align-items: center;
+    .alertIcon{
+        width: 15px;
+        height: 12px;
+        position: relative;
+        left: 46.75%;
+    }
+    .deviceOnlineStatus{
+        font-size: 12px;
+        font-family: Microsoft YaHei;
+        font-weight: 400;
+        color: #32548A;
+        position: relative;
+        left: 46.75%;
+        bottom: 2px;
+    }
+}
+// 显示详情
+.displayDetail{
+    width: 100%;
+    height: 91%;
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: repeat(2,50%);
+    align-items: center;
+    justify-items: center;
+    .tableBackground{
+        width: 90%;
+        height: 90%;
+        background: linear-gradient(0deg, rgba(4,18,39,0.32), rgba(12,40,92,0.32), rgba(9,28,62,0.32), rgba(13,47,110,0.32));
+        border: 1px solid #020B27;
+        box-shadow: 0px 39px 98px 0px rgba(16, 56, 129, 0.55);
+        border-radius: 6px;
+        display: flex;
+        align-content: start;
+        justify-content: center;
+        flex-wrap: wrap;
+        position: relative;
+        .tableHead{
+            width: 91.85%;
+            height: 12.24%;
+            display: grid;
+            grid-template-columns: 20% 80%;
+            grid-template-rows: 100%;
+            justify-items: start;
+            align-items: center;
+            position: relative;
+            top: 12.65%;
+            background: linear-gradient(0deg, #092249, #0B2E6F);
+        }
+        .tableBody{
+            width: 91.85%;
+            height: 67.78%;
+            position: relative;
+            top: 13%;
+            background: linear-gradient(0deg, rgba(6,23,44,0.8), rgba(7,22,52,0.8));
+            display: grid;
+            grid-template-columns: repeat(auto-fill,20%);
+            .bodyTitle{
+                width: 100%;
+                height: 100%;
+                display: grid;
+                grid-template-columns: 100%;
+                grid-template-rows: repeat(4,1fr);
+                align-items: center;
+                .bodyTitleCell{
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    border-bottom: 1px solid #16408B;
+                }
+            }
+            .bodyDetailList{
+                width: 100%;
+                height: 100%;
+                display: grid;
+                grid-template-columns: 100%;
+                grid-template-rows: repeat(4,1fr);
+                align-items: center;
+                position: relative;
+                .bodyDetail{
+                    width: 100%;
+                    height: 100%;
+                    border-bottom: 1px solid #16408B;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding-top: 3px;
+                }
+                .whiteFont:nth-child(1){
+                    color: #AEC9FF;
+                    background: url('./img/数据抬头背景.png') no-repeat center;
+                    background-size: 32.25% 66.2%;
+                }
+            }
+        }
+    }
+    .sliderControlContent{
+        width: 50%;
+        height: 90%;
+        display: grid;
+        grid-template-columns: 19px auto 19px;
+        grid-template-rows: 100%;
+        background: linear-gradient(0deg, rgba(4,18,39,0.3), rgba(12,40,92,0.3), rgba(9,28,62,0.3), rgba(13,47,110,0.3));
+        border: 1px solid #020B27;
+        box-shadow: 0px 39px 98px 0px rgba(16, 56, 129, 0.55);
+        border-radius: 5px;
+        .controlContent{
+            display: grid;
+            grid-template-columns: repeat(auto-fill,10%);
+            grid-template-rows: 90%;
+            grid-auto-columns: 10%;
+            align-content: center;
+            overflow-y: hidden;
+            overflow-x: auto;
+            grid-auto-flow: column;
+            user-select: none;
+            &::-webkit-scrollbar{
+                height: 5px;
+                background: rgba(9, 37, 92, 0.78);
+                border-radius: 3px;
+            }
+            &::-webkit-scrollbar-thumb{
+                width: 150px;
+                background: #0E52D4;
+                border-radius: 3px;
+            }
+            .singleSliderContent{
+                position: relative;
+                display: flex;
+                justify-content: center;
+                align-content: space-around;
+                flex-wrap: wrap;
+                .sliderName{
+                    font-size: 16px;
+                    font-family: Microsoft YaHei;
+                    font-weight: bold;
+                    color:#2998FF;
+                }
+                .sliderNum{
+                    width: 78.26%;
+                    height: 8.02%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    position: relative;
+                    .sliderNumInput{
+                        width: 100%;
+                        height: 100%;
+                        font-size: 12px;
+                        color: #ABCBFF;
+                        background: none;
+                        outline: none;
+                        border: none;
+                        text-align: center;
+                    }
+                }
+                .soundOff{
+                    width: 82.6%;
+                    height: 8.52%;
+                    position: relative;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    cursor: pointer;
+                }
+                .sliderContent{
+                    width: 52.17%;
+                    height: 50.37%;
+                    position: relative;
+                    user-select: none;
+                    .sliderBar{
+                        width: 4px;
+                        height: 100%;
+                        background: #081A38;
+                        border: 1px solid;
+                        border-image: linear-gradient(0deg, #274294, #0F2568) 1 1;
+                        box-shadow: 2px 3px 3px 0px rgba(7, 10, 23, 0.78);
+                        border-radius: 2px;
+                        position: absolute;
+                        top: 0;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        margin: auto;
+                    }
+                    .sliderCover{
+                        width: 4px;
+                        height: 0;
+                        background: #009BB5;
+                        border-radius: 2px;
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        margin: 0 auto;
+                    }
+                    .sliderImg{
+                        width: 50%;
+                        height: 17.91%;
+                        position: absolute;
+                        left: 0;
+                        right: 0;
+                        margin: 0 auto;
+                        cursor: pointer;
+                        background-image: url('./img/滑块.png');
+                        background-size: 100% 100%;
+                    }
+                }
+            }
+        }
+    }
+}
+// 字体样式
+.dustyBlue{
+    font-size: 0.94vw;
+    font-family: Microsoft YaHei;
+    font-weight: 400;
+    color: #AEC9FF;
+}
+.whiteFont{
+    font-size: 0.94vw;
+    font-family: Microsoft YaHei;
+    font-weight: 400;
+    color: #FFFFFF;
+}

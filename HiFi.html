@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功放</title>
+    <!-- <link rel="stylesheet" href="./module/index.css"> -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="./HiFi.css">
+</head>
+<body>
+    <div id="hifi" v-loading="total_page_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" style="width: 100vw;height: 100vh;">
+        <!-- 整体页面背景 -->
+        <img src="./img/背景.png" style="position: absolute;width: 100vw;height: 100vh;z-index: -999;">
+        <!-- 抬头样式 -->
+        <div style="position: relative;width: 100%;height: 5%;">
+            <img src="./img/抬头背景.png" style="width: 100%;height: 100%;object-fit: cover;position: absolute;top: 0;left: 0;">
+            <div style="width: 100%;height: 100%;display: flex;">
+                <img src="./img/返回按钮.png" class="returnButton">
+                <img src="./img/logo.png" class="logo">
+                <span class="logoTitle">音频物联软件 V1.6</span>
+                <div class="verticalBar"></div>
+                <span class="deviceName">DSP</span>
+                <span class="deviceNameSubscript">DM1608</span>
+                <img class="rightSideButton" src="./img/设置按钮.png">
+                <img class="rightSideButton" src="./img/最小化按钮.png">
+                <img class="rightSideButton" src="./img/最大化按钮.png">
+                <img class="rightSideButton" src="./img/关闭按钮.png">
+            </div>
+        </div>
+        <!-- 中部样式 -->
+        <div class="topSwitchBar">
+            <div
+                style="z-index: -99;width: 100%;height: 100%;position: absolute;top: 0;left: 0;background: linear-gradient(0deg, #040D19, #041F52);">
+            </div>
+            <div style="grid-area: c;">
+                <img class="alertIcon" src="./img/警告标识.png">
+                <span class="deviceOnlineStatus">设备不在线</span>
+            </div>
+        </div>
+        <!-- 控制详情样式 -->
+        <div class="displayDetail">
+            <div class="tableBackground">
+                <img src="./img/背景样式.png" style="width: 14.75%;height: 1.83%;">
+                <div class="tableHead">
+                    <span class="dustyBlue" style="padding-left: 12.77%;">POWER TEMP.</span>
+                    <span class="whiteFont">{{tableHead.power_temp}}℃</span>
+                </div>
+                <div class="tableBody">
+                    <div class="bodyTitle">
+                        <div v-for="bodyTitle in tableHead.bodyTitles" class="bodyTitleCell dustyBlue" style="padding-left: 12.77%;">{{bodyTitle}}</div>
+                    </div>
+                    <div v-for="channel in tableBody.bodyDetailList" class="bodyDetailList">
+                        <div class="bodyDetail whiteFont">CH{{channel.number}}</div>
+                        <div class="bodyDetail whiteFont">{{channel.voltage}}</div>
+                        <div class="bodyDetail whiteFont">{{channel.current}}</div>
+                        <div class="bodyDetail whiteFont">{{channel.ch_temp}}℃</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 滑动条控制 -->
+            <div class="sliderControlContent">
+                <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+                <div class="controlContent">
+                    <single-slider v-for="channel,index in tableBody.bodyDetailList" :channel="channel" :index="index" :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken" :key="index"></single-slider>
+                </div>
+                <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+            </div>
+        </div>
+    </div>
+    <script src="./module/jquery-3.6.0.js"></script>
+    <script src="./module/underscore-min.js"></script>
+    <script src="./module/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <!-- <script src="./module/element-ui.js"></script> -->
+    <script src="./module/axios.min.js"></script>
+    <script src="./HiFi.js"></script>
+</body>
+</html>

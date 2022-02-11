@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调音台</title>
+    <link rel="stylesheet" href="./module/index.css">
+    <link rel="stylesheet" href="soundConsole.css">
+</head>
+
+<body>
+    <div id="sound" style="width: 100vw;height: 100vh;display: grid;grid-template-rows: 5% 3.89% auto;">
+        <!-- 整体页面背景 -->
+        <img src="./img/背景.png" style="position: absolute;width: 100vw;height: 100vh;z-index: -999;">
+        <!-- 抬头样式 -->
+        <div style="position: relative;width: 100%;">
+            <img src="./img/抬头背景.png"
+                style="width: 100%;height: 100%;object-fit: cover;position: absolute;top: 0;left: 0;">
+            <div style="width: 100%;height: 100%;display: flex;">
+                <img src="./img/返回按钮.png" class="returnButton">
+                <img src="./img/logo.png" class="logo">
+                <span class="logoTitle">音频物联软件 V1.6</span>
+                <div class="verticalBar"></div>
+                <span class="deviceName">调音台DM1608</span>
+                <span class="deviceNameSubscript">DM1608</span>
+                <img class="rightSideButton" src="./img/设置按钮.png">
+                <img class="rightSideButton" src="./img/最小化按钮.png">
+                <img class="rightSideButton" src="./img/最大化按钮.png">
+                <img class="rightSideButton" src="./img/关闭按钮.png">
+            </div>
+        </div>
+        <!-- 中部样式 -->
+        <div class="topSwitchBar">
+            <div style="z-index: -99;width: 100%;height: 100%;position: absolute;top: 0;left: 0;background: linear-gradient(0deg, #040D19, #041F52);"></div>
+            <div style="grid-area: c;">
+                <img class="alertIcon" src="./img/警告标识.png">
+                <span class="deviceOnlineStatus">设备不在线</span>
+            </div>
+        </div>
+        <!-- 控制详情样式 -->
+        <div style="display: grid;align-items: center;width: 100%;grid-template-columns: 50% 50%;justify-items: center;">
+            <div class="channelControl">
+                <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+                <div class="channelContent">
+                    <single-channel v-for="channel,index in channel_in" :channel="channel" :device_id="deviceId" :token="loginToken"></single-channel>
+                    <!-- <div v-for="channel,index in channels" class="singleChannel">
+                        <img src="./img/控制条.png" style="width: 100%;height: 100%;position: absolute;z-index: -99;object-fit: cover;">
+                        <span class="channelName">IN{{index+1}}</span>
+                        <div style="width: 100%;height: 2px;">
+                            <div style="background: #01112C;width: 100%;height: 1px;"></div>
+                            <div style="background: #1053A7;width: 100%;height: 1px;"></div>
+                        </div>
+                        <div @click="soundOff=!soundOff" style="width: 82.6%;height: 8.52%;position: relative;display: flex;justify-content: center;align-items: center;cursor: pointer;">
+                            <img :src="[soundOff?'./img/静音.png':'./img/静音通常.png']"
+                                style="position: absolute;width: 100%;height: 100%;z-index: -99;">
+                            <span :style="{fontSize:'12px', color: soundOff ? '#FFABCF' : '#ABCBFF'}">静音</span>
+                        </div>
+                        <div class="channelNum">
+                            <span style="font-size: 12px;color: #ABCBFF;">{{index+1.5}}</span>
+                        </div>
+                        <div @click="sliderTurnTo($event)" class="channelSliderContent">
+                            <img src="./img/滑块条.png" style="width: 100%;height: 100%;position: absolute;z-index: -99;">
+                            <div class="channelSliderBar"></div>
+                            <div :style="{height:sliderCover+'px'}" class="channelSliderCover"></div>
+                            <div :style="{bottom:sliderHeight+'px'}" @mousedown="silderMove($event)" class="channelSlider">
+                            </div>
+                        </div>
+                        <div style="height: 10.02%;width: 100%;"></div>
+                    </div> -->
+                </div>
+                <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+            </div>
+            <div class="channelControl">
+                <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+                <div class="channelContent">
+                    <single-channel-right v-for="channel,index in channel_out" :channel="channel" :device_id="deviceId" :token="loginToken"></single-channel-right>
+                </div>
+                <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+            </div>
+        </div>
+    </div>
+    <script src="./module/jquery-3.6.0.js"></script>
+    <script src="./module/underscore-min.js"></script>
+    <script src="./module/vue.js"></script>
+    <script src="./module/element-ui.js"></script>
+    <script src="./module/axios.min.js"></script>
+    <script src="./soundConsole.js"></script>
+</body>
+
+</html>
