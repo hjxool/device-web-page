@@ -1,100 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>电频</title>
-    <!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"> -->
-    <link rel="stylesheet" href="./module/index.css">
-    <link rel="stylesheet" href="frequency.css">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>电频</title>
+  <link rel="stylesheet" href="./module/index.css">
+  <link rel="stylesheet" href="frequency.css">
 </head>
+
 <body>
-    <div id="power_frequency" v-loading="total_page_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" style="width: 100vw;height: 100vh;">
-        <!-- 整体页面背景 -->
-        <img src="./img/背景.png" style="position: absolute;width: 100vw;height: 100vh;z-index: -999;">
-        <!-- 抬头样式 -->
-        <div style="position: relative;width: 100%;height: 5%;">
-            <img src="./img/抬头背景.png" style="width: 100%;height: 100%;object-fit: cover;position: absolute;top: 0;left: 0;">
-            <div style="width: 100%;height: 100%;display: flex;">
-                <img src="./img/返回按钮.png" class="returnButton">
-                <img src="./img/logo.png" class="logo">
-                <span class="logoTitle">音频物联软件 V1.6</span>
-                <div class="verticalBar"></div>
-                <span class="deviceName">DSP</span>
-                <span class="deviceNameSubscript">DM1608</span>
-                <img class="rightSideButton" src="./img/设置按钮.png">
-                <img class="rightSideButton" src="./img/最小化按钮.png">
-                <img class="rightSideButton" src="./img/最大化按钮.png">
-                <img class="rightSideButton" src="./img/关闭按钮.png">
-            </div>
-        </div>
-        <!-- 中部样式 -->
-        <div class="topSwitchBar">
-            <div style="z-index: -99;width: 100%;height: 100%;position: absolute;top: 0;left: 0;background: linear-gradient(0deg, #040D19, #041F52);">
-            </div>
-            <div style="grid-area: c;">
-                <img class="alertIcon" src="./img/警告标识.png">
-                <span class="deviceOnlineStatus">设备不在线</span>
-            </div>
-        </div>
-        <!-- 控制详情样式 -->
-        <div class="displayDetail">
-            <!-- 电频显示容器 -->
-            <div class="frequency_box">
-                <div class="frequency_box_bg">
-                    <img src="./img/输入设备电频.png" class="frequency_box_bg_icon">
-                    <!-- 输入电频 -->
-                    <div class="frequency_bg">
-                        <div v-for="input,index in processor_detail.Channel_input_list" class="single_frequency_bar">
-                            <span style="font-size: 0.62vw;color: #2865C9;">{{input.level}}</span>
-                            <div class="single_frequency_bar_box">
-                                <img src="./img/输入设备电频条.png" style="width: 100%;height: 100%;position: absolute;">
-                                <div :style="change_frequency_height(input)" class="input_progress_bar"></div>
-                            </div>
-                            <span style="font-size: 0.62vw;color: #ABCBFF;font-weight: bold;">I{{input.number}}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="frequency_box_bg">
-                    <img src="./img/背景样式.png" class="frequency_box_bg_icon">
-                    <!-- 输出电频 -->
-                    <div class="frequency_bg">
-                        <div v-for="output,index in processor_detail.Channel_output_list" class="single_frequency_bar">
-                            <span style="font-size: 0.62vw;color: #2865C9;">{{output.level}}</span>
-                            <div class="single_frequency_bar_box">
-                                <img src="./img/输入设备电频条.png" style="width: 100%;height: 100%;position: absolute;">
-                                <div :style="change_frequency_height(output)" class="out_progress_bar"></div>
-                            </div>
-                            <span style="font-size: 0.62vw;color: #2998FF;font-weight: bold;">O{{output.number}}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- 滑动条控制 -->
-            <div class="sliderControlContent">
-                <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
-                <div class="controlContent">
-                    <single-slider v-for="input,index in processor_detail.Channel_input_list" :channel="input" :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken"></single-slider>
-                </div>
-                <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
-            </div>
-            <div class="sliderControlContent">
-                <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
-                <div class="controlContent">
-                    <single-slider-out v-for="output,index in processor_detail.Channel_output_list" :channel="output" :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken"></single-slider-out>
-                </div>
-                <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
-            </div>
-        </div>
+  <div id="power_frequency" v-loading="total_page_loading" element-loading-text="拼命加载中"
+    element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)"
+    style="width: 100vw;height: 100vh;">
+    <!-- 整体页面背景 -->
+    <img src="./img/背景.png" style="position: absolute;width: 100vw;height: 100vh;z-index: -999;">
+    <!-- 抬头样式 -->
+    <div style="position: relative;width: 100%;height: 5%;">
+      <img src="./img/抬头背景.png" style="width: 100%;height: 100%;object-fit: cover;position: absolute;top: 0;left: 0;">
+      <div style="width: 100%;height: 100%;display: flex;">
+        <img src="./img/返回按钮.png" class="returnButton">
+        <img src="./img/logo.png" class="logo">
+        <span class="logoTitle">音频物联软件 V1.6</span>
+        <div class="verticalBar"></div>
+        <span class="deviceName">DSP</span>
+        <span class="deviceNameSubscript">DM1608</span>
+        <img class="rightSideButton" src="./img/设置按钮.png">
+        <img class="rightSideButton" src="./img/最小化按钮.png">
+        <img class="rightSideButton" src="./img/最大化按钮.png">
+        <img class="rightSideButton" src="./img/关闭按钮.png">
+      </div>
     </div>
-    
+    <!-- 中部样式 -->
+    <div class="topSwitchBar">
+      <div
+        style="z-index: -99;width: 100%;height: 100%;position: absolute;top: 0;left: 0;background: linear-gradient(0deg, #040D19, #041F52);">
+      </div>
+      <div style="grid-area: c;">
+        <img class="alertIcon" src="./img/警告标识.png">
+        <span class="deviceOnlineStatus">设备不在线</span>
+      </div>
+    </div>
+    <!-- 控制详情样式 -->
+    <div class="displayDetail">
+      <!-- 电频显示容器 -->
+      <div class="frequency_box">
+        <div class="frequency_box_bg">
+          <img src="./img/输入设备电频.png" class="frequency_box_bg_icon">
+          <!-- 输入电频 -->
+          <div class="frequency_bg">
+            <div v-for="input,index in processor_detail.Channel_input_list" class="single_frequency_bar">
+              <span style="font-size: 0.62vw;color: #2865C9;">{{input.level}}</span>
+              <div class="single_frequency_bar_box">
+                <img src="./img/输入设备电频条.png" style="width: 100%;height: 100%;position: absolute;">
+                <div :style="change_frequency_height(input)" class="input_progress_bar"></div>
+              </div>
+              <span style="font-size: 0.62vw;color: #ABCBFF;font-weight: bold;">I{{input.number}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="frequency_box_bg">
+          <img src="./img/背景样式.png" class="frequency_box_bg_icon">
+          <!-- 输出电频 -->
+          <div class="frequency_bg">
+            <div v-for="output,index in processor_detail.Channel_output_list" class="single_frequency_bar">
+              <span style="font-size: 0.62vw;color: #2865C9;">{{output.level}}</span>
+              <div class="single_frequency_bar_box">
+                <img src="./img/输入设备电频条.png" style="width: 100%;height: 100%;position: absolute;">
+                <div :style="change_frequency_height(output)" class="out_progress_bar"></div>
+              </div>
+              <span style="font-size: 0.62vw;color: #2998FF;font-weight: bold;">O{{output.number}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 滑动条控制 -->
+      <div class="sliderControlContent">
+        <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+        <div class="controlContent">
+          <single-slider v-for="input,index in processor_detail.Channel_input_list" :channel="input"
+            :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken" :in_title="'IN'"
+            :out_title="'OUT'" :in_or_out="processor_detail.Channel_input_list.in_or_out"></single-slider>
+        </div>
+        <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+      </div>
+      <div class="sliderControlContent">
+        <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+        <div class="controlContent">
+          <single-slider v-for="output,index in processor_detail.Channel_output_list" :channel="output"
+            :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken" :in_title="'IN'"
+            :out_title="'OUT'" :in_or_out="processor_detail.Channel_output_list.in_or_out"></single-slider>
+        </div>
+        <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+      </div>
+    </div>
+  </div>
+
 </body>
-    <script src="./module/jquery-3.6.0.js"></script>
-    <script src="./module/underscore-min.js"></script>
-    <script src="./module/vue.js"></script>
-    <!-- <script src="https://unpkg.com/element-ui/lib/index.js"></script> -->
-    <script src="./module/element-ui.js"></script>
-    <script src="./module/axios.min.js"></script>
-    <script src="./frequency.js"></script>
+<script src="./module/jquery-3.6.0.js"></script>
+<script src="./module/underscore-min.js"></script>
+<script src="./module/vue.js"></script>
+<script src="./module/element-ui.js"></script>
+<script src="./module/axios.min.js"></script>
+<script src="./frequency.js"></script>
+
 </html>
