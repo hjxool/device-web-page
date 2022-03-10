@@ -7,13 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>电频</title>
   <link rel="stylesheet" href="./module/index.css">
+  <link rel="stylesheet" href="./vue_template.css">
   <link rel="stylesheet" href="frequency.css">
 </head>
 
 <body>
   <div id="power_frequency" v-loading="total_page_loading" element-loading-text="拼命加载中"
     element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)"
-    style="width: 100vw;height: 100vh;">
+    style="width: 100%;height: 100%;position: absolute;">
     <!-- 整体页面背景 -->
     <img src="./img/背景.png" style="position: absolute;width: 100vw;height: 100vh;z-index: -999;">
     <!-- 抬头样式 -->
@@ -34,16 +35,24 @@
     </div>
     <!-- 中部样式 -->
     <div class="topSwitchBar">
+      <!-- 背景 -->
       <div
         style="z-index: -99;width: 100%;height: 100%;position: absolute;top: 0;left: 0;background: linear-gradient(0deg, #040D19, #041F52);">
       </div>
-      <div style="grid-area: c;">
-        <img class="alertIcon" src="./img/警告标识.png">
-        <span class="deviceOnlineStatus">设备不在线</span>
+      <!-- 选项切换卡 -->
+      <div style="grid-area: b;display: flex;">
+        <div class="option" v-for="option,index in static_par.options" @click="static_par.option_focus=index"
+          :style="{background:static_par.option_focus==index?'url(./img/选项切换亮.png)':'url(./img/选项切换暗.png)'}">{{option}}
+        </div>
+      </div>
+      <!-- 离线在线 -->
+      <div style="grid-area: c;justify-self: end;margin-right: 10%;">
+        <img style="width: 15px;height: 12px;" src="./img/警告标识.png">
+        <span style="font-size: 12px;color: #32548a;">设备不在线</span>
       </div>
     </div>
-    <!-- 控制详情样式 -->
-    <div class="displayDetail">
+    <!-- 电平 -->
+    <div v-if="static_par.option_focus==0" class="frequency">
       <!-- 电频显示容器 -->
       <div class="frequency_box">
         <div class="frequency_box_bg">
@@ -79,20 +88,66 @@
       <div class="sliderControlContent">
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
         <div class="controlContent">
-          <!-- <single-slider v-for="input,index in processor_detail.Channel_input_list" :channel="input"
+          <single-slider v-for="input,index in processor_detail.Channel_input_list" :channel="input"
             :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken" :in_title="'IN'"
-            :out_title="'OUT'" :in_or_out="processor_detail.Channel_input_list.in_or_out"></single-slider> -->
-
+            :out_title="'OUT'" :in_or_out="0" :slider_max="'+12'" :slider_min="'-12'"></single-slider>
         </div>
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
       </div>
       <div class="sliderControlContent">
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
         <div class="controlContent">
-          <!-- <single-slider v-for="output,index in processor_detail.Channel_output_list" :channel="output"
+          <single-slider v-for="output,index in processor_detail.Channel_output_list" :channel="output"
             :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken" :in_title="'IN'"
-            :out_title="'OUT'" :in_or_out="processor_detail.Channel_output_list.in_or_out"></single-slider> -->
+            :out_title="'OUT'" :in_or_out="1" :slider_max="'+12'" :slider_min="'-12'"></single-slider>
         </div>
+        <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+      </div>
+    </div>
+    <!-- 输入 -->
+    <div v-if="static_par.option_focus==1" class="input">
+      <div class="func_module">
+        <!-- 导航栏 -->
+        <div class="nav_bar">
+          <div class="nav_bar_decor" style="border-bottom: 2px solid rgba(18,47,93, 0.66);">
+            <img src="./img/装饰图.png" style="width: 18px;height: 18px;">
+          </div>
+          <div class="module_layout">
+            <div v-for="module,index in static_par.input_modules" class="single_module" @click="switch_module(index)"
+              :style="{color:static_par.input_module_focus==index?'#02EEFF':'#707BBA'}">
+              {{module}}
+              <img :src="static_par.input_module_focus==index?'./img/模块背景亮.png':'./img/模块背景暗.png'"
+                style="width: 100%;height: 100%;position: absolute;z-index: -1;">
+            </div>
+          </div>
+          <div class="nav_bar_decor" style="border-top: 2px solid rgba(2,10,24, 0.66);">
+            <img src="./img/装饰图.png" style="width: 18px;height: 18px;">
+          </div>
+        </div>
+        <!-- 滚动显示功能框 -->
+        <div class="scroll_display">
+          <div class="module_box">
+            <div class="single_module_layout delay">
+              <span class="title">{{static_par.input_modules[0]}}</span>
+              <div class="vertical">
+                <div class="input_box" v-for="i in 3">
+                  <img src="./img/显示数字背景框.png" class="input_bg">
+                  <input v-model.number="static_par.temp" class="input_text">
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sliderControlContent">
+        <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+        <div class="controlContent"></div>
+        <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+      </div>
+      <div class="sliderControlContent">
+        <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
+        <div class="controlContent"></div>
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
       </div>
     </div>
@@ -104,6 +159,7 @@
 <script src="./module/vue.js"></script>
 <script src="./module/element-ui.js"></script>
 <script src="./module/axios.min.js"></script>
+<script src="./vue_template.js"></script>
 <script src="./frequency.js"></script>
 
 </html>

@@ -4,6 +4,16 @@
 body {
 	margin: 0;
 }
+::-webkit-scrollbar {
+	height: 5px;
+	background: rgba(9, 37, 92, 0.78);
+	border-radius: 3px;
+}
+::-webkit-scrollbar-thumb {
+	width: 150px;
+	background: #0e52d4;
+	border-radius: 3px;
+}
 .returnButton {
 	width: 2.34%;
 	height: 64.28%;
@@ -72,26 +82,20 @@ body {
 	display: grid;
 	grid-template-columns: 6.1% auto 12.81%;
 	grid-template-rows: 100%;
-	grid-template-areas: '. . c';
+	grid-template-areas: '. b c';
 	align-items: center;
-	.alertIcon {
-		width: 15px;
-		height: 12px;
-		position: relative;
-		left: 46.75%;
-	}
-	.deviceOnlineStatus {
-		font-size: 12px;
-		font-family: Microsoft YaHei;
-		font-weight: 400;
-		color: #32548a;
-		position: relative;
-		left: 46.75%;
-		bottom: 2px;
+	.option {
+		width: 5.41vw;
+		height: 3.89vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 15px;
+		color: #ffffff;
 	}
 }
 // 显示详情
-.displayDetail {
+.frequency {
 	width: 100%;
 	height: 91%;
 	display: grid;
@@ -168,119 +172,225 @@ body {
 			}
 		}
 	}
-	.sliderControlContent {
-		// width: 100%;
-		height: 90%;
+}
+// 输入输出模组
+.sliderControlContent {
+	// width: 100%;
+	height: 90%;
+	display: grid;
+	grid-template-columns: 19px auto 19px;
+	grid-template-rows: 100%;
+	background: linear-gradient(0deg, rgba(4, 18, 39, 0.3), rgba(12, 40, 92, 0.3), rgba(9, 28, 62, 0.3), rgba(13, 47, 110, 0.3));
+	border: 1px solid #020b27;
+	box-shadow: 0px 39px 98px 0px rgba(16, 56, 129, 0.55);
+	border-radius: 5px;
+	user-select: none;
+	.controlContent {
 		display: grid;
-		grid-template-columns: 19px auto 19px;
-		grid-template-rows: 100%;
-		background: linear-gradient(0deg, rgba(4, 18, 39, 0.3), rgba(12, 40, 92, 0.3), rgba(9, 28, 62, 0.3), rgba(13, 47, 110, 0.3));
-		border: 1px solid #020b27;
-		box-shadow: 0px 39px 98px 0px rgba(16, 56, 129, 0.55);
-		border-radius: 5px;
-		user-select: none;
-		.controlContent {
-			display: grid;
-			grid-auto-flow: column;
-			grid-template-rows: 90%;
-			grid-auto-columns: 68px;
-			align-content: center;
-			overflow-y: hidden;
-			overflow-x: auto;
-			&::-webkit-scrollbar {
-				height: 5px;
-				background: rgba(9, 37, 92, 0.78);
-				border-radius: 3px;
+		grid-auto-flow: column;
+		grid-template-rows: 90%;
+		grid-auto-columns: 68px;
+		align-content: center;
+		overflow-y: hidden;
+		overflow-x: auto;
+		.singleSliderContent {
+			width: 100%;
+			height: 100%;
+			position: relative;
+			display: flex;
+			justify-content: center;
+			align-content: space-around;
+			flex-wrap: wrap;
+			.sliderName {
+				font-size: 16px;
+				font-family: Microsoft YaHei;
+				font-weight: bold;
 			}
-			&::-webkit-scrollbar-thumb {
-				width: 150px;
-				background: #0e52d4;
-				border-radius: 3px;
+			.sliderNum {
+				width: 78.26%;
+				height: 8.02%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				position: relative;
+				.sliderNumInput {
+					width: 100%;
+					height: 100%;
+					font-size: 12px;
+					color: #abcbff;
+					background: none;
+					outline: none;
+					border: none;
+					text-align: center;
+				}
 			}
-			.singleSliderContent {
-				width: 100%;
-				height: 100%;
+			.soundOff {
+				width: 82.6%;
+				height: 8.52%;
 				position: relative;
 				display: flex;
 				justify-content: center;
-				align-content: space-around;
-				flex-wrap: wrap;
-				.sliderName {
-					font-size: 16px;
-					font-family: Microsoft YaHei;
-					font-weight: bold;
+				align-items: center;
+				cursor: pointer;
+			}
+			.sliderContent {
+				width: 52.17%;
+				height: 50.37%;
+				position: relative;
+				user-select: none;
+				.sliderBar {
+					width: 4px;
+					height: 100%;
+					background: #081a38;
+					border: 1px solid;
+					border-image: linear-gradient(0deg, #274294, #0f2568) 1 1;
+					box-shadow: 2px 3px 3px 0px rgba(7, 10, 23, 0.78);
+					border-radius: 2px;
+					position: absolute;
+					top: 0;
+					bottom: 0;
+					left: 0;
+					right: 0;
+					margin: auto;
 				}
-				.sliderNum {
-					width: 78.26%;
-					height: 8.02%;
-					display: flex;
-					justify-content: center;
-					align-items: center;
-					position: relative;
-					.sliderNumInput {
-						width: 100%;
-						height: 100%;
-						font-size: 12px;
-						color: #abcbff;
-						background: none;
-						outline: none;
-						border: none;
-						text-align: center;
-					}
+				.sliderCover {
+					width: 4px;
+					height: 0;
+					background: #009bb5;
+					border-radius: 2px;
+					position: absolute;
+					bottom: 0;
+					left: 0;
+					right: 0;
+					margin: 0 auto;
 				}
-				.soundOff {
-					width: 82.6%;
-					height: 8.52%;
-					position: relative;
-					display: flex;
-					justify-content: center;
-					align-items: center;
+				.sliderImg {
+					width: 50%;
+					height: 17.91%;
+					position: absolute;
+					left: 0;
+					right: 0;
+					margin: 0 auto;
 					cursor: pointer;
-				}
-				.sliderContent {
-					width: 52.17%;
-					height: 50.37%;
-					position: relative;
-					user-select: none;
-					.sliderBar {
-						width: 4px;
-						height: 100%;
-						background: #081a38;
-						border: 1px solid;
-						border-image: linear-gradient(0deg, #274294, #0f2568) 1 1;
-						box-shadow: 2px 3px 3px 0px rgba(7, 10, 23, 0.78);
-						border-radius: 2px;
-						position: absolute;
-						top: 0;
-						bottom: 0;
-						left: 0;
-						right: 0;
-						margin: auto;
-					}
-					.sliderCover {
-						width: 4px;
-						height: 0;
-						background: #009bb5;
-						border-radius: 2px;
-						position: absolute;
-						bottom: 0;
-						left: 0;
-						right: 0;
-						margin: 0 auto;
-					}
-					.sliderImg {
-						width: 50%;
-						height: 17.91%;
-						position: absolute;
-						left: 0;
-						right: 0;
-						margin: 0 auto;
-						cursor: pointer;
-						background-image: url('./img/滑块.png');
-						background-size: 100% 100%;
-					}
+					background-image: url('./img/滑块.png');
+					background-size: 100% 100%;
 				}
 			}
 		}
+	}
+}
+// 输入详情
+.input {
+	width: 100%;
+	height: 91%;
+	display: grid;
+	grid-template-rows: 1fr 1fr;
+	grid-template-columns: 1fr 1fr;
+	.func_module {
+		align-self: center;
+		grid-column-start: 1;
+		grid-column-end: 3;
+		width: 100%;
+		height: 90%;
+		display: grid;
+		grid-template-columns: 5.73% auto;
+		.nav_bar {
+			display: grid;
+			grid-template-rows: 8.75% auto 8.75%;
+			background: linear-gradient(0deg, rgba(4, 18, 39, 0.62), rgba(12, 40, 92, 0.62), rgba(9, 28, 62, 0.62), rgba(13, 47, 110, 0.62));
+			border: 1px solid rgba(2, 11, 39, 0.62);
+			box-shadow: 0px 39px 98px 0px rgba(16, 56, 129, 0.55);
+			border-radius: 6px;
+			.nav_bar_decor {
+				width: 100%;
+				height: 100%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				.symbol {
+					width: 18px;
+					height: 18px;
+					background: linear-gradient(0deg, #2549a2, #182f6a);
+					border-radius: 50%;
+				}
+			}
+			.module_layout {
+				width: 100%;
+				height: 100%;
+				border-top: 2px solid rgba(2, 10, 24, 0.66);
+				border-bottom: 2px solid rgba(18, 47, 93, 0.66);
+				display: flex;
+				flex-wrap: wrap;
+				align-content: space-around;
+				.single_module {
+					width: 100%;
+					height: 5.18vh;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					font-size: 15px;
+					position: relative;
+					z-index: 10;
+				}
+			}
+		}
+		.scroll_display {
+			overflow-x: auto;
+			overflow-y: hidden;
+		}
+	}
+}
+// 模块通用样式
+.module_box {
+	width: 100%;
+	height: 98%;
+	display: flex;
+	justify-content: start;
+	.single_module_layout {
+		display: grid;
+		grid-template-rows: 8.75% auto;
+		background: linear-gradient(0deg, rgba(4, 18, 39, 0.42), rgba(12, 40, 92, 0.42), rgba(9, 28, 62, 0.42), rgba(13, 47, 110, 0.42));
+		border: 1px solid rgba(2, 11, 39, 0.42);
+		box-shadow: 0px 39px 98px 0px rgba(16, 56, 129, 0.55);
+		border-radius: 6px;
+		.title {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 14px;
+			color: #02eeff;
+			border-bottom: 1px solid #0e274f;
+		}
+		.vertical {
+			display: grid;
+			justify-content: center;
+		}
+		.input_box {
+			width: 72px;
+			height: 32px;
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			.input_bg {
+				width: 100%;
+				height: 100%;
+				position: absolute;
+				z-index: -1;
+			}
+			.input_text {
+				width: 100%;
+				height: 100%;
+				font-size: 12px;
+				color: #abcbff;
+				outline: 0;
+				background: none;
+				border: none;
+				text-align: center;
+			}
+		}
+	}
+	.delay {
+		width: 242px;
 	}
 }

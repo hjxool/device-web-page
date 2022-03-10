@@ -67,9 +67,8 @@ Vue.component('single-slider', {
 	props: ['channel', 'device_id', 'token', 'in_title', 'out_title', 'in_or_out', 'slider_max', 'slider_min'],
 	data: function () {
 		return {
-			// mute: this.channel.mute, //静音
+			mute: this.channel.mute, //静音
 			sliderNum: Number, //音量
-			newValue: 0, //监听器传入的新值
 			sliderNum_temp: Number, //传递给子组件的中间变量
 		};
 	},
@@ -120,27 +119,27 @@ Vue.component('single-slider', {
 			});
 		},
 		// 静音
-		// soundOff: function () {
-		// 	if (this.mute == 0) {
-		// 		this.mute = 1;
-		// 	} else {
-		// 		this.mute = 0;
-		// 	}
-		// 	let channelsData = [];
-		// 	let obj = {};
-		// 	obj.mute = this.mute;
-		// 	obj.number = this.channel.number;
-		// 	obj.volume = this.sliderNum;
-		// 	channelsData.push(obj);
-		// 	// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
-		// },
+		soundOff: function () {
+			if (this.mute == 0) {
+				this.mute = 1;
+			} else {
+				this.mute = 0;
+			}
+			let channelsData = [];
+			let obj = {};
+			obj.mute = this.mute;
+			obj.number = this.channel.number;
+			obj.volume = this.sliderNum;
+			channelsData.push(obj);
+			// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
+		},
 		// 命令下发
 		order_set: function () {
 			// 根据输入改变滑块
 			let channelsData = [];
 			let obj = {};
-			// obj.mute = this.mute;
-			// obj.number = this.channel.number;
+			obj.mute = this.mute;
+			obj.number = this.channel.number;
 			obj.volume = this.sliderNum;
 			channelsData.push(obj);
 			// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
@@ -184,8 +183,8 @@ Vue.component('single-slider', {
 			window.onmouseup = function () {
 				let channelsData = [];
 				let obj = {};
-				// obj.mute = _this.mute;
-				// obj.number = _this.channel.number;
+				obj.mute = _this.mute;
+				obj.number = _this.channel.number;
 				obj.volume = nowY_temp;
 				channelsData.push(obj);
 				// _this.request('post', channelControlUrl, { id: _this.device_id, channelsData: channelsData }, '123456', _this.token, function () {});
@@ -208,8 +207,8 @@ Vue.component('single-slider', {
 			this.sliderNum_temp = nowY;
 			let channelsData = [];
 			let obj = {};
-			// obj.mute = this.mute;
-			// obj.number = this.channel.number;
+			obj.mute = this.mute;
+			obj.number = this.channel.number;
 			obj.volume = nowY;
 			channelsData.push(obj);
 			// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
@@ -227,8 +226,12 @@ Vue.component('single-slider', {
 	},
 	template: `
         <div class="single_slider_content">
-          <div class="slider_name">{{in_or_out==0?in_title:out_title}}</div>
+          <div class="slider_name">{{in_or_out==0?in_title:out_title}} {{channel.number}}</div>
           <div class="slider_display">
+            <div @click="soundOff" class="soundOff">
+              <img :src="[mute==0?'./img/静音通常.png':'./img/静音.png']" style="position: absolute;width: 100%;height: 100%;">
+              <span :style="{fontSize: '12px',color:mute==0?'#ABCBFF':'#FFABCF',zIndex:'1'}">静音</span>
+            </div>
             <div class="slider_num">
               <input @keyup.enter="command_send" v-model.number="sliderNum" maxlength="5" class="slider_num_input">
               <span style="font-size: 12px;color: #ABCBFF;">dB</span>
@@ -236,7 +239,7 @@ Vue.component('single-slider', {
             <div class="slider_box">
               <span class="slider_range">{{slider_max}}</span>
               <div @mousedown="sliderTurnTo($event)" class="slider" ref="slider">
-                <img src="./img/滑块大.png" style="width: 100%;height: 100%;position: absolute;">
+                <img src="./img/滑块小.png" style="width: 100%;height: 100%;position: absolute;">
                 <div class="slider_bar"></div>
                 <div :style="change_cover_height(sliderNum_temp)" class="slider_cover"></div>
                 <div :style="change_slider_bottom(sliderNum_temp)" @mousedown.stop="silderMove($event)" class="slider_img"></div>
@@ -244,10 +247,30 @@ Vue.component('single-slider', {
               <span class="slider_range">{{slider_min}}</span>
             </div>
           </div>
-          <!--  <div @click="soundOff" class="soundOff">
-                <img :src="[mute==0?'./img/静音通常.png':'./img/静音.png']" style="position: absolute;width: 100%;height: 100%;z-index: -99;">
-                <span :style="{fontSize: '12px',color:mute==0?'#ABCBFF':'#FFABCF'}">静音</span>
-          </div> -->
         </div>
     `,
+});
+// 横向滑块模组
+Vue.component('row-slider', {
+	template: `
+    <div class="row_slider_box" ref="slider" @mousedown="slider_turn_to($event)">
+      <div class="slider_bg"></div>
+      <div class="slider_cover" :style=""></div>
+      <div class="slider_thumb" :style="">
+        <img src="./img/滑块2.png" style="width:100%;height:100%;">
+      </div>
+    </div>
+  `,
+	props: ['channel', 'slider_max', 'slider_min'],
+	data() {
+		return {
+			total_length: Number,
+		};
+	},
+	methods: {
+		slider_turn_to(e) {
+			let dom = this.$refs.slider;
+			let length = e.clientX - dom.getBoundingClientRect().left;
+		},
+	},
 });

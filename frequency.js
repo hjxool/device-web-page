@@ -192,10 +192,20 @@ let power_frequency = new Vue({
 	el: '#power_frequency',
 	data: {
 		total_page_loading: false, //总页面加载遮罩
+		// 发送请求所需公用参数
 		resCommonParams: {
 			loginToken: '', //保存跳转token
 			deviceId: '', //保存跳转查询设备ID
 		},
+		// 静态页面效果使用变量
+		static_par: {
+			option_focus: 0, //上方选项卡
+			options: ['电平', '输入', '输出', '矩阵', '混音前增益', '预设'],
+			input_module_focus: 0,
+			input_modules: ['输入延时', '噪声门', '反馈抑制', '输入滤波', '输入压限'],
+			temp: 0,
+		},
+		// 请求数据存放处
 		processor_detail: {
 			Channel_output_list: [],
 			Channel_input_list: [],
@@ -247,14 +257,16 @@ let power_frequency = new Vue({
 		processor_param: function (res) {
 			console.log(res);
 			this.processor_detail.Channel_input_list = res.data.data.Channel_input;
-			this.processor_detail.Channel_input_list.in_or_out = 0;
 			this.processor_detail.Channel_output_list = res.data.data.Channel_output;
-			this.processor_detail.Channel_output_list.in_or_out = 1;
 		},
 		// 改变音频条高度
 		change_frequency_height: function (content) {
 			let temp = (content.level + 100) / 135;
 			return `height:${temp * 100 * 0.87}%;`;
+		},
+		// 模块切换显示
+		switch_module(index) {
+			this.static_par.input_module_focus = index;
 		},
 	},
 });
