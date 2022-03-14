@@ -162,6 +162,7 @@ Vue.component('single-slider', {
 			let _this = this;
 			let nowY_temp;
 			let content = this.$refs.slider;
+			// 这里滑块是从底下往上渲染 与坐标系相反 所以是用总长-计算出来的尺寸
 			let sliderBottom = content.offsetHeight - e.target.offsetTop - e.target.offsetHeight / 2;
 			let mouseY = e.clientY;
 			window.onmousemove = function (e) {
@@ -255,22 +256,67 @@ Vue.component('row-slider', {
 	template: `
     <div class="row_slider_box" ref="slider" @mousedown="slider_turn_to($event)">
       <div class="slider_bg"></div>
-      <div class="slider_cover" :style=""></div>
-      <div class="slider_thumb" :style="">
-        <img src="./img/滑块2.png" style="width:100%;height:100%;">
+      <div class="slider_cover" :style="change_cover_width(slider_thumb)"></div>
+      <div class="slider_thumb" :style="change_slider_left(slider_thumb)" @mousedown.stop="slider_move($event)">
+        <img draggable="false" src="./img/滑块2.png" style="width:100%;height:100%;">
       </div>
     </div>
   `,
 	props: ['channel', 'slider_max', 'slider_min'],
 	data() {
 		return {
-			total_length: Number,
+			slider_thumb: Number,
 		};
+	},
+	created() {
+		this.slider_thumb = this.channel;
 	},
 	methods: {
 		slider_turn_to(e) {
 			let dom = this.$refs.slider;
 			let length = e.clientX - dom.getBoundingClientRect().left;
+			if (length < 0) {
+				length = 0;
+			}
+			if (length > dom.offsetWidth) {
+				length = dom.offsetWidth;
+			}
+			length = (length / dom.offsetWidth) * (Number(this.slider_max) - Number(this.slider_min)) + Number(this.slider_min);
+			length = Math.floor(length * 10 + 0.5) / 10;
+			this.slider_thumb = length;
+		},
+		slider_move(e) {
+			console.log(e.currentTarget);
+			let _this = this;
+			let temp;
+			let dom = this.$refs.slider;
+			// 算的是焦点位置 所以要加上滑块样式的中心点
+			let slider_left = e.currentTarget.offsetLeft + e.currentTarget.offsetWidth / 2;
+			let mouseX = e.clientX;
+			window.onmousemove = function (e) {
+				let mouseW = e.clientX - mouseX;
+				let length = mouseW + slider_left;
+				if (length < 0) {
+					length = 0;
+				}
+				if (length > dom.offsetWidth) {
+					length = dom.offsetWidth;
+				}
+				length = (length / dom.offsetWidth) * (Number(_this.slider_max) - Number(_this.slider_min)) + Number(_this.slider_min);
+				length = Math.floor(length * 10 + 0.5) / 10;
+				_this.slider_thumb = length;
+			};
+			window.onmouseup = function () {
+				window.onmousemove = false;
+			};
+		},
+		change_cover_width(length) {
+			let width = (length - Number(this.slider_min)) / (Number(this.slider_max) - Number(this.slider_min));
+			return `width:${width * 100}%;`;
+		},
+		change_slider_left(length) {
+			let left = (length - Number(this.slider_min)) / (Number(this.slider_max) - Number(this.slider_min));
+			return `left:calc(${left * 100}% - 10px);`;
 		},
 	},
 });

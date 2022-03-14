@@ -201,9 +201,12 @@ let power_frequency = new Vue({
 		static_par: {
 			option_focus: 0, //上方选项卡
 			options: ['电平', '输入', '输出', '矩阵', '混音前增益', '预设'],
-			input_module_focus: 0,
-			input_modules: ['输入延时', '噪声门', '反馈抑制', '输入滤波', '输入压限'],
+			module_focus: 0,
+			input_modules: [{ name: '输入延时' }, { name: '噪声门' }, { name: '反馈抑制' }, { name: '输入滤波' }, { name: '输入压限' }],
+			output_modules: [{ name: '输出延时' }, { name: '噪声门' }, { name: '反馈抑制' }, { name: '输出滤波' }, { name: '输出压限' }],
 			temp: 0,
+			feedback: false,
+			filter_focus: 0,
 		},
 		// 请求数据存放处
 		processor_detail: {
@@ -264,9 +267,79 @@ let power_frequency = new Vue({
 			let temp = (content.level + 100) / 135;
 			return `height:${temp * 100 * 0.87}%;`;
 		},
+		// 切换选项卡
+		switch_option(index) {
+			// 在此方法刚触发时 v-if的节点还没有渲染出来 得等this.static_par.option_focus切换过去再查找节点
+			if (this.static_par.option_focus != index) {
+				this.static_par.option_focus = index;
+				this.$nextTick(() => {
+					let obj = this.$refs.scroll_display;
+					switch (index) {
+						case 1:
+							this.static_par.module_focus = 0;
+							obj.scrollLeft = 0;
+							break;
+						case 2:
+							this.static_par.module_focus = 0;
+							obj.scrollLeft = 0;
+							break;
+					}
+				});
+			}
+		},
 		// 模块切换显示
 		switch_module(index) {
-			this.static_par.input_module_focus = index;
+			this.static_par.module_focus = index;
+			// 跳转 将offsetLeft置为0
+			let obj = this.$refs.scroll_display;
+			obj.style.scrollBehavior = 'smooth';
+			switch (index) {
+				case 0:
+					obj.scrollLeft = document.getElementById('delay').offsetLeft;
+					break;
+				case 1:
+					obj.scrollLeft = document.getElementById('noise').offsetLeft;
+					break;
+				case 2:
+					obj.scrollLeft = document.getElementById('feedback').offsetLeft;
+					break;
+				case 3:
+					obj.scrollLeft = document.getElementById('filter').offsetLeft;
+					break;
+				case 4:
+					obj.scrollLeft = document.getElementById('press_limit').offsetLeft;
+					break;
+			}
+			obj.style.scrollBehavior = '';
+		},
+		// 横向滚动
+		scroll_x(e) {
+			let obj = this.$refs.scroll_display;
+			// 大于0为向下滚动 wheelDelta默认为40 系统设置滚动几行就是 40x行
+			if (e.wheelDelta < 0) {
+				obj.scrollLeft += 100;
+			} else {
+				obj.scrollLeft -= 100;
+			}
+			if (this.static_par.option_focus == 1 || this.static_par.option_focus == 2) {
+				// 检测滚动位置点亮导航栏
+				let noise = document.getElementById('noise').offsetLeft;
+				let feedback = document.getElementById('feedback').offsetLeft;
+				let filter = document.getElementById('filter').offsetLeft;
+				let press_limit = document.getElementById('press_limit').offsetLeft;
+				let scrollLeft = obj.scrollLeft;
+				if (scrollLeft < noise) {
+					this.static_par.module_focus = 0;
+				} else if (scrollLeft >= noise && scrollLeft < feedback) {
+					this.static_par.module_focus = 1;
+				} else if (scrollLeft >= feedback && scrollLeft < filter) {
+					this.static_par.module_focus = 2;
+				} else if (scrollLeft >= filter && scrollLeft < press_limit) {
+					this.static_par.module_focus = 3;
+				} else if (scrollLeft >= press_limit) {
+					this.static_par.module_focus = 4;
+				}
+			}
 		},
 	},
 });
