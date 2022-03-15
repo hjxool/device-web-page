@@ -145,8 +145,8 @@ Vue.component('single-slider', {
 			// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
 		},
 		command_send: function () {
-			console.log('按下回车');
-			if (this.sliderNum.length > 0) {
+			let reg = /(^\-?\d+$)|(^\+?\d+$)|(^\-?\d+\.\d+$)|(^\+?\d+\.\d+$)/;
+			if (reg.test(this.sliderNum)) {
 				if (this.sliderNum < Number(this.slider_min)) {
 					this.sliderNum = Number(this.slider_min);
 				} else if (this.sliderNum > Number(this.slider_max)) {
@@ -159,13 +159,12 @@ Vue.component('single-slider', {
 			}
 		},
 		silderMove: function (e) {
-			let _this = this;
 			let nowY_temp;
 			let content = this.$refs.slider;
 			// 这里滑块是从底下往上渲染 与坐标系相反 所以是用总长-计算出来的尺寸
 			let sliderBottom = content.offsetHeight - e.target.offsetTop - e.target.offsetHeight / 2;
 			let mouseY = e.clientY;
-			window.onmousemove = function (e) {
+			window.onmousemove = (e) => {
 				let mouseH = mouseY - e.clientY;
 				let nowY = mouseH + sliderBottom;
 				if (nowY < 0) {
@@ -174,21 +173,21 @@ Vue.component('single-slider', {
 				if (nowY > content.offsetHeight) {
 					nowY = content.offsetHeight;
 				}
-				nowY = (nowY / content.offsetHeight) * (Number(_this.slider_max) - Number(_this.slider_min)) + Number(_this.slider_min);
+				nowY = (nowY / content.offsetHeight) * (Number(this.slider_max) - Number(this.slider_min)) + Number(this.slider_min);
 				nowY = Math.floor(nowY * 10 + 0.5) / 10;
 				nowY_temp = nowY;
 				// sliderNum和sliderNum_temp不一样 前者是用于显示在面板上 后者用于回调改变滑块高度 两者没有关联关系 仅在面板输入时做了一次等值
-				_this.sliderNum = nowY;
-				_this.sliderNum_temp = nowY;
+				this.sliderNum = nowY;
+				this.sliderNum_temp = nowY;
 			};
-			window.onmouseup = function () {
+			window.onmouseup = () => {
 				let channelsData = [];
 				let obj = {};
-				obj.mute = _this.mute;
-				obj.number = _this.channel.number;
+				obj.mute = this.mute;
+				obj.number = this.channel.number;
 				obj.volume = nowY_temp;
 				channelsData.push(obj);
-				// _this.request('post', channelControlUrl, { id: _this.device_id, channelsData: channelsData }, '123456', _this.token, function () {});
+				// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
 				window.onmousemove = false;
 			};
 		},
@@ -286,14 +285,12 @@ Vue.component('row-slider', {
 			this.slider_thumb = length;
 		},
 		slider_move(e) {
-			console.log(e.currentTarget);
-			let _this = this;
 			let temp;
 			let dom = this.$refs.slider;
 			// 算的是焦点位置 所以要加上滑块样式的中心点
 			let slider_left = e.currentTarget.offsetLeft + e.currentTarget.offsetWidth / 2;
 			let mouseX = e.clientX;
-			window.onmousemove = function (e) {
+			window.onmousemove = (e) => {
 				let mouseW = e.clientX - mouseX;
 				let length = mouseW + slider_left;
 				if (length < 0) {
@@ -302,11 +299,11 @@ Vue.component('row-slider', {
 				if (length > dom.offsetWidth) {
 					length = dom.offsetWidth;
 				}
-				length = (length / dom.offsetWidth) * (Number(_this.slider_max) - Number(_this.slider_min)) + Number(_this.slider_min);
+				length = (length / dom.offsetWidth) * (Number(this.slider_max) - Number(this.slider_min)) + Number(this.slider_min);
 				length = Math.floor(length * 10 + 0.5) / 10;
-				_this.slider_thumb = length;
+				this.slider_thumb = length;
 			};
-			window.onmouseup = function () {
+			window.onmouseup = () => {
 				window.onmousemove = false;
 			};
 		},
