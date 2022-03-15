@@ -544,6 +544,11 @@
           </div>
         </div>
       </div>
+      <div v-if="static_par.option_focus==3"
+        style="grid-column-start: 1;grid-column-end: 3;grid-row-start: 1;grid-row-end: 3;">
+        <iframe src="./调音台dsp/index.html?type=matrix" frameborder="0" scrolling="no" width="100%"
+          height="100%"></iframe>
+      </div>
       <!-- 混音前增益 -->
       <div class="mix_sound scroll_display" v-if="static_par.option_focus==4" @mousewheel="scroll_x($event)"
         ref="scroll_display">
@@ -584,7 +589,9 @@
         </div>
       </div>
       <!-- 滑动条控制 -->
-      <div class="sliderControlContent">
+      <div
+        v-show="static_par.option_focus==0||static_par.option_focus==1||static_par.option_focus==2||static_par.option_focus==4"
+        class="sliderControlContent">
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
         <div class="controlContent">
           <single-slider v-for="input,index in processor_detail.Channel_input_list" :channel="input"
@@ -593,7 +600,9 @@
         </div>
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
       </div>
-      <div class="sliderControlContent">
+      <div
+        v-show="static_par.option_focus==0||static_par.option_focus==1||static_par.option_focus==2||static_par.option_focus==4"
+        class="sliderControlContent">
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
         <div class="controlContent">
           <single-slider v-for="output,index in processor_detail.Channel_output_list" :channel="output"

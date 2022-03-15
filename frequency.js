@@ -87,31 +87,35 @@ let power_frequency = new Vue({
 			// 在此方法刚触发时 v-if的节点还没有渲染出来 得等this.static_par.option_focus切换过去再查找节点
 			if (this.static_par.option_focus != index) {
 				this.static_par.option_focus = index;
-				this.$nextTick(() => {
-					let obj = this.$refs.scroll_display;
-					switch (index) {
-						case 1:
+				switch (index) {
+					case 0:
+						break;
+					case 1:
+						this.$nextTick(() => {
+							let obj = this.$refs.scroll_display;
 							this.static_par.module_focus = 0;
 							obj.scrollLeft = 0;
-							break;
-						case 2:
+						});
+						break;
+					case 2:
+						this.$nextTick(() => {
+							let obj = this.$refs.scroll_display;
 							this.static_par.module_focus = 0;
 							obj.scrollLeft = 0;
-							break;
-					}
-				});
+						});
+						break;
+					case 3:
+						console.log(this.static_par.option_focus);
+						break;
+					case 4:
+						// 给滑块输入框一个临时变量 让每个变量单独维护 在回车确认时再修改原值
+						for (let i = 0; i < this.processor_detail.Channel_input_list.length; i++) {
+							this.$set(this.processor_detail.Channel_input_list[i], 'temp_input', this.processor_detail.Channel_input_list[i].digitalgain);
+							this.$set(this.processor_detail.Channel_input_list[i], 'temp_reverse', 0);
+						}
+						break;
+				}
 			}
-			switch (index) {
-				case 4:
-					// 给滑块输入框一个临时变量 让每个变量单独维护 在回车确认时再修改原值
-					for (let i = 0; i < this.processor_detail.Channel_input_list.length; i++) {
-						this.$set(this.processor_detail.Channel_input_list[i], 'temp_input', this.processor_detail.Channel_input_list[i].digitalgain);
-						this.$set(this.processor_detail.Channel_input_list[i], 'temp_reverse', 0);
-					}
-					break;
-			}
-			let t = this === power_frequency;
-			console.log(t);
 		},
 		// 模块切换显示
 		switch_module(index) {
@@ -169,7 +173,6 @@ let power_frequency = new Vue({
 		},
 		// 反相
 		reverse_off(input) {
-			console.log(input);
 			if (input.temp_reverse == 0) {
 				input.temp_reverse = 1;
 			} else {
