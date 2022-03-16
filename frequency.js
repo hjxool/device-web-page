@@ -21,6 +21,7 @@ let power_frequency = new Vue({
 			temp: 0,
 			feedback: false,
 			filter_focus: 0,
+			delay_slider_height: 0,
 		},
 		// 请求数据存放处
 		processor_detail: {
@@ -283,6 +284,45 @@ let power_frequency = new Vue({
 		change_slider_bottom: function (par) {
 			let temp = (par - -12) / (12 - -12);
 			return `bottom:calc(${temp * 100}% - 18px);`;
+		},
+		// 垂直滑块功能
+		slider_turn_to(e) {
+			let dom = e.currentTarget;
+			let length = dom.offsetHeight - (e.clientY - dom.getBoundingClientRect().top);
+			if (length < 0) {
+				length = 0;
+			}
+			if (length > dom.offsetHeight) {
+				length = dom.offsetHeight;
+			}
+			length = (length / dom.offsetHeight) * (12 - -12) + -12;
+			length = Math.floor(length * 10 + 0.5) / 10;
+			this.static_par.delay_slider_height = length;
+		},
+		slider_move(e) {
+			let dom = this.$refs.delay_slider;
+			let slider_bottom = dom.offsetHeight - e.currentTarget.offsetTop - e.currentTarget.offsetHeight / 2;
+			let mouseY = e.clientY;
+			window.onmousemove = (e) => {
+				let mouseH = mouseY - e.clientY;
+				let length = mouseH + slider_bottom;
+				if (length < 0) {
+					length = 0;
+				}
+				if (length > dom.offsetHeight) {
+					length = dom.offsetHeight;
+				}
+				length = (length / dom.offsetHeight) * (12 - -12) + -12;
+				length = Math.floor(length * 10 + 0.5) / 10;
+				this.static_par.delay_slider_height = length;
+			};
+			window.onmouseup = (e) => {
+				window.onmousemove = false;
+			};
+		},
+		change_delay_slider_bottom(par) {
+			let temp = (par - -12) / (12 - -12);
+			return `bottom:calc(${temp * 100}% - 10px);`;
 		},
 	},
 });

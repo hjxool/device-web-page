@@ -1,3 +1,6 @@
+[v-cloak] {
+	display: none !important;
+}
 * {
 	box-sizing: border-box;
 }
@@ -505,4 +508,45 @@ body {
 .scroll_display {
 	overflow-x: auto;
 	overflow-y: hidden;
+}
+.delay_box {
+	align-self: center;
+	justify-self: center;
+	width: 90%;
+	height: 90%;
+	display: grid;
+	grid-template-columns: 1.5fr 1fr;
+	position: relative;
+	.slider_bg {
+		width: 4px;
+		height: 100%;
+		position: absolute;
+		left: 0;
+		right: 0;
+		margin: 0 auto;
+		background: #82a7ff;
+		border: 1px solid;
+		border-image: linear-gradient(0deg, #274294, #0a226b) 1 1;
+		box-shadow: 2px 3px 3px 0px rgba(7, 10, 23, 0.78);
+		border-radius: 2px;
+	}
+	.delay_slider_cover {
+		width: 4px;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		margin: 0 auto;
+		background: #0e67ed;
+		border-radius: 2px;
+	}
+	.delay_slider_thumb {
+		width: 20px;
+		height: 20px;
+		position: absolute;
+		left: 0;
+		right: 0;
+		margin: 0 auto;
+		cursor: pointer;
+	}
 }

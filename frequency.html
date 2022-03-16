@@ -14,7 +14,7 @@
 <body>
   <div id="power_frequency" v-loading="total_page_loading" element-loading-text="拼命加载中"
     element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)"
-    style="width: 100%;height: 100%;position: absolute;">
+    style="width: 100%;height: 100%;position: absolute;" v-cloak>
     <!-- 整体页面背景 -->
     <img src="./img/背景.png" style="position: absolute;width: 100vw;height: 100vh;z-index: -999;">
     <!-- 抬头样式 -->
@@ -109,16 +109,26 @@
             <!-- 延时 -->
             <div class="single_module_layout delay" id="delay">
               <span class="title">{{static_par.input_modules[0].name}}</span>
-              <div class="vertical">
-                <div class="input_box" v-for="i in 3">
-                  <img src="./img/显示数字背景框.png" class="input_bg">
-                  <input v-model.number="static_par.temp" class="input_text">
+              <div class="delay_box">
+                <div style="width: 100%;height: 100%;display: grid;align-items: center;justify-items: center;">
+                  <div class="input_box" v-for="i in 3">
+                    <img src="./img/显示数字背景框.png" class="input_bg">
+                    <input v-model.number="static_par.temp" class="input_text">
+                  </div>
                 </div>
-                <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
-                <div style="display: flex;">
+                <div class="row_slider_box" @mousedown="slider_turn_to($event)" ref="delay_slider"
+                  style="height:78%;align-self: center;">
+                  <div class="slider_bg"></div>
+                  <div class="delay_slider_cover" :style="change_cover_height(static_par.delay_slider_height)"></div>
+                  <div class="delay_slider_thumb" :style="change_delay_slider_bottom(static_par.delay_slider_height)"
+                    @mousedown.stop="slider_move($event)">
+                    <img draggable="false" src="./img/滑块2.png" style="width:100%;height:100%;">
+                  </div>
+                </div>
+                <!-- <div style="display: flex;">
                   <div class="button_style" style="margin-right: 10%;">复制到</div>
                   <div class="button_style">复位</div>
-                </div>
+                </div> -->
               </div>
             </div>
             <!-- 噪声门 -->
@@ -339,16 +349,26 @@
             <!-- 延时 -->
             <div class="single_module_layout delay" id="delay">
               <span class="title">{{static_par.output_modules[0].name}}</span>
-              <div class="vertical">
-                <div class="input_box" v-for="i in 3">
-                  <img src="./img/显示数字背景框.png" class="input_bg">
-                  <input v-model.number="static_par.temp" class="input_text">
+              <div class="delay_box">
+                <div style="width: 100%;height: 100%;display: grid;align-items: center;justify-items: center;">
+                  <div class="input_box" v-for="i in 3">
+                    <img src="./img/显示数字背景框.png" class="input_bg">
+                    <input v-model.number="static_par.temp" class="input_text">
+                  </div>
                 </div>
-                <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
-                <div style="display: flex;">
+                <div class="row_slider_box" @mousedown="slider_turn_to($event)" ref="delay_slider"
+                  style="height:78%;align-self: center;">
+                  <div class="slider_bg"></div>
+                  <div class="delay_slider_cover" :style="change_cover_height(static_par.delay_slider_height)"></div>
+                  <div class="delay_slider_thumb" :style="change_delay_slider_bottom(static_par.delay_slider_height)"
+                    @mousedown.stop="slider_move($event)">
+                    <img draggable="false" src="./img/滑块2.png" style="width:100%;height:100%;">
+                  </div>
+                </div>
+                <!-- <div style="display: flex;">
                   <div class="button_style" style="margin-right: 10%;">复制到</div>
                   <div class="button_style">复位</div>
-                </div>
+                </div> -->
               </div>
             </div>
             <!-- 噪声门 -->
@@ -546,8 +566,7 @@
       </div>
       <div v-if="static_par.option_focus==3"
         style="grid-column-start: 1;grid-column-end: 3;grid-row-start: 1;grid-row-end: 3;">
-        <iframe src="./调音台dsp/index.html?type=matrix" frameborder="0" scrolling="no" width="100%"
-          height="100%"></iframe>
+        <iframe src="./调音台dsp/index.html?" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
       </div>
       <!-- 混音前增益 -->
       <div class="mix_sound scroll_display" v-if="static_par.option_focus==4" @mousewheel="scroll_x($event)"
@@ -588,10 +607,14 @@
           </div>
         </div>
       </div>
+      <!-- 预设 -->
+      <div v-if="static_par.option_focus==5"
+        style="grid-column-start: 1;grid-column-end: 3;grid-row-start: 1;grid-row-end: 3;">
+        <iframe src="./调音台dsp/index.html?type=matrix2" frameborder="0" scrolling="no" width="100%"
+          height="100%"></iframe>
+      </div>
       <!-- 滑动条控制 -->
-      <div
-        v-show="static_par.option_focus==0||static_par.option_focus==1||static_par.option_focus==2||static_par.option_focus==4"
-        class="sliderControlContent">
+      <div v-show="static_par.option_focus!=3 & static_par.option_focus!=5" class="sliderControlContent">
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
         <div class="controlContent">
           <single-slider v-for="input,index in processor_detail.Channel_input_list" :channel="input"
@@ -600,9 +623,7 @@
         </div>
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
       </div>
-      <div
-        v-show="static_par.option_focus==0||static_par.option_focus==1||static_par.option_focus==2||static_par.option_focus==4"
-        class="sliderControlContent">
+      <div v-show="static_par.option_focus!=3 & static_par.option_focus!=5" class="sliderControlContent">
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
         <div class="controlContent">
           <single-slider v-for="output,index in processor_detail.Channel_output_list" :channel="output"
