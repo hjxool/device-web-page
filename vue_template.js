@@ -223,12 +223,15 @@ Vue.component('single-slider', {
 			let temp = (par - Number(this.slider_min)) / (Number(this.slider_max) - Number(this.slider_min));
 			return `bottom:calc(${temp * 100}% - 18px);`;
 		},
+		fun1() {
+			console.log('外边框', this);
+		},
 	},
 	template: `
-        <div class="single_slider_content">
+        <div class="single_slider_content" @mousedown="fun1">
           <div class="slider_name">{{in_or_out==0?in_title:out_title}} {{channel.number}}</div>
           <div class="slider_display">
-            <div @click="soundOff" class="soundOff">
+            <div @mousedown.stop="soundOff" class="soundOff">
               <img :src="[mute==0?'./img/静音通常.png':'./img/静音.png']" style="position: absolute;width: 100%;height: 100%;">
               <span :style="{fontSize: '12px',color:mute==0?'#ABCBFF':'#FFABCF',zIndex:'1'}">静音</span>
             </div>
