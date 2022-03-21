@@ -64,7 +64,7 @@ Vue.component('level-component', {
 
 // 滑块组件
 Vue.component('single-slider', {
-	props: ['channel', 'device_id', 'token', 'in_title', 'out_title', 'in_or_out', 'slider_max', 'slider_min'],
+	props: ['channel', 'token', 'in_title', 'out_title', 'in_or_out', 'slider_max', 'slider_min'],
 	data: function () {
 		return {
 			mute: this.channel.mute, //静音
@@ -72,20 +72,11 @@ Vue.component('single-slider', {
 			sliderNum_temp: Number, //传递给子组件的中间变量
 		};
 	},
-	created: function () {
-		this.obj_key_judge();
+	mounted: function () {
+		this.sliderNum = this.channel.gain;
+		this.sliderNum_temp = this.channel.gain;
 	},
 	methods: {
-		// 因为读取数组不同，属性名不同
-		obj_key_judge() {
-			if (this.in_or_out == 0) {
-				this.sliderNum = this.channel.digitalgain;
-				this.sliderNum_temp = this.channel.digitalgain;
-			} else {
-				this.sliderNum = this.channel.gain;
-				this.sliderNum_temp = this.channel.gain;
-			}
-		},
 		// 封装的请求方法
 		request: function (method, url, data, key, token, func) {
 			axios({
@@ -128,10 +119,10 @@ Vue.component('single-slider', {
 			let channelsData = [];
 			let obj = {};
 			obj.mute = this.mute;
-			obj.number = this.channel.number;
+			obj.number = this.channel.channel_no;
 			obj.volume = this.sliderNum;
 			channelsData.push(obj);
-			// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
+			// this.request('post', channelControlUrl, { id: this.channel.device_id, channelsData: channelsData }, '123456', this.token, function () {});
 		},
 		// 命令下发
 		order_set: function () {
@@ -139,10 +130,10 @@ Vue.component('single-slider', {
 			let channelsData = [];
 			let obj = {};
 			obj.mute = this.mute;
-			obj.number = this.channel.number;
+			obj.number = this.channel.channel_no;
 			obj.volume = this.sliderNum;
 			channelsData.push(obj);
-			// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
+			// this.request('post', channelControlUrl, { id: this.channel.device_id, channelsData: channelsData }, '123456', this.token, function () {});
 		},
 		command_send: function () {
 			let reg = /(^\-?\d+$)|(^\+?\d+$)|(^\-?\d+\.\d+$)|(^\+?\d+\.\d+$)/;
@@ -184,10 +175,10 @@ Vue.component('single-slider', {
 				let channelsData = [];
 				let obj = {};
 				obj.mute = this.mute;
-				obj.number = this.channel.number;
+				obj.number = this.channel.channel_no;
 				obj.volume = nowY_temp;
 				channelsData.push(obj);
-				// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
+				// this.request('post', channelControlUrl, { id: this.channel.device_id, channelsData: channelsData }, '123456', this.token, function () {});
 				window.onmousemove = false;
 			};
 		},
@@ -208,10 +199,10 @@ Vue.component('single-slider', {
 			let channelsData = [];
 			let obj = {};
 			obj.mute = this.mute;
-			obj.number = this.channel.number;
+			obj.number = this.channel.channel_no;
 			obj.volume = nowY;
 			channelsData.push(obj);
-			// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
+			// this.request('post', channelControlUrl, { id: this.channel.device_id, channelsData: channelsData }, '123456', this.token, function () {});
 		},
 		// 改变滑块进度条高度
 		change_cover_height: function (par) {
@@ -223,13 +214,24 @@ Vue.component('single-slider', {
 			let temp = (par - Number(this.slider_min)) / (Number(this.slider_max) - Number(this.slider_min));
 			return `bottom:calc(${temp * 100}% - 18px);`;
 		},
-		fun1() {
-			console.log('外边框', this);
+		link_to_in_or_out() {
+			if (this.in_or_out == 0) {
+				let channel_name_temp = `IN${this.channel.channel_no}`;
+				this.request('post', get_noise_and_feedback_url, { device_id: this.channel.device_id, channel_no: this.channel.channel_no }, '123456', this.token, (res) => {
+					this.$emit('noise_feedback_event', res.data.data);
+				});
+				this.$emit('channel_name_event', channel_name_temp);
+				this.$emit('option_focus', 1);
+			} else if (this.in_or_out == 1) {
+				let channel_name_temp = `OUT${this.channel.channel_no}`;
+				this.$emit('channel_name_event', channel_name_temp);
+				this.$emit('option_focus', 2);
+			}
 		},
 	},
 	template: `
-        <div class="single_slider_content" @mousedown="fun1">
-          <div class="slider_name">{{in_or_out==0?in_title:out_title}} {{channel.number}}</div>
+        <div class="single_slider_content" @mousedown="link_to_in_or_out">
+          <div class="slider_name">{{in_or_out==0?in_title:out_title}} {{channel.channel_no}}</div>
           <div class="slider_display">
             <div @mousedown.stop="soundOff" class="soundOff">
               <img :src="[mute==0?'./img/静音通常.png':'./img/静音.png']" style="position: absolute;width: 100%;height: 100%;">
@@ -264,16 +266,50 @@ Vue.component('row-slider', {
       </div>
     </div>
   `,
-	props: ['channel', 'slider_max', 'slider_min'],
+	props: ['channel', 'slider_max', 'slider_min', 'device_id', 'token', 'noise_feedback'],
 	data() {
 		return {
-			slider_thumb: Number,
+			slider_thumb: this.channel,
 		};
 	},
-	created() {
-		this.slider_thumb = this.channel;
+	watch: {
+		channel(val) {
+			this.slider_thumb = val;
+		},
 	},
 	methods: {
+		// 封装的请求方法
+		request: function (method, url, data, key, token, func) {
+			axios({
+				method: method,
+				url: url,
+				data: {
+					client: 'PC',
+					user: '',
+					version: '1.0.1',
+					data: data,
+					key: key,
+				},
+				headers: { token: token },
+			}).then((res) => {
+				if (res.data.code == 1000) {
+					if (res.data.data) {
+						func(res);
+					} else {
+						this.$message.error('数据为空');
+					}
+				} else {
+					this.$alert(res.data.message, '提示', {
+						confirmButtonText: '确定',
+						callback: () => {
+							if (res.data.code == 3005 || res.data.code == 3006) {
+								window.location.href = '../test demo/login/login.html';
+							}
+						},
+					});
+				}
+			});
+		},
 		slider_turn_to(e) {
 			let dom = this.$refs.slider;
 			let length = e.clientX - dom.getBoundingClientRect().left;
@@ -286,9 +322,10 @@ Vue.component('row-slider', {
 			length = (length / dom.offsetWidth) * (Number(this.slider_max) - Number(this.slider_min)) + Number(this.slider_min);
 			length = Math.floor(length * 10 + 0.5) / 10;
 			this.slider_thumb = length;
+			this.$emit('slider_num', length);
+			this.noise_feedback_control();
 		},
 		slider_move(e) {
-			let temp;
 			let dom = this.$refs.slider;
 			// 算的是焦点位置 所以要加上滑块样式的中心点
 			let slider_left = e.currentTarget.offsetLeft + e.currentTarget.offsetWidth / 2;
@@ -305,8 +342,10 @@ Vue.component('row-slider', {
 				length = (length / dom.offsetWidth) * (Number(this.slider_max) - Number(this.slider_min)) + Number(this.slider_min);
 				length = Math.floor(length * 10 + 0.5) / 10;
 				this.slider_thumb = length;
+				this.$emit('slider_num', length);
 			};
 			window.onmouseup = () => {
+				this.noise_feedback_control();
 				window.onmousemove = false;
 			};
 		},
@@ -317,6 +356,19 @@ Vue.component('row-slider', {
 		change_slider_left(length) {
 			let left = (length - Number(this.slider_min)) / (Number(this.slider_max) - Number(this.slider_min));
 			return `left:calc(${left * 100}% - 10px);`;
+		},
+		// 噪声及反馈抑制控制
+		noise_feedback_control() {
+			let params = {
+				device_id: this.device_id,
+				channel_no: this.noise_feedback.channel_no,
+				noise_gate_status: this.noise_feedback.noise_gate_status,
+				threshold: this.slider_thumb,
+				start_time: this.noise_feedback.start_time,
+				recover_time: this.noise_feedback.recover_time,
+				feedback_suppressor_status: this.noise_feedback.feedback_suppressor_status,
+			};
+			this.request('post', push_noise_feedback_url, params, '123456', this.token, (res) => {});
 		},
 	},
 });

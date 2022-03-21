@@ -1,0 +1,1 @@
+let ui=new Vue({el:"#uidom",data:{txblsx:{},icon:"src/logo.ico","禁止右键":!0,"跨域使用":!1,"开启canvas":!1,"开启二维码预览":!1,"黑暗模式":!1,router:location.hash.substr(1),txys:{zt:"#6667AB",cg:"#47986B",jg:"#D57D6F",cw:"#E9445D",info:"#002FA7",bjh:"#28282E",bjb:"#F0ECE9"},ip:"",token:"",type:"",plb:[],juz:[],juz2:[],jz2hk:12},methods:{}});

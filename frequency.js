@@ -1,6 +1,8 @@
 let zhuanyeUrl = 'http://192.168.30.66:18113/';
 let processor_detail_url = zhuanyeUrl + 'api/gds/channelDetail';
 let channelControlUrl = zhuanyeUrl + 'api/gds/sendInstruction';
+let get_noise_and_feedback_url = zhuanyeUrl + 'api/gds/getNoiseGateAndFeedbackSuppressorInfo';
+let push_noise_feedback_url = zhuanyeUrl + 'api/gds/noiseGateControl';
 
 let power_frequency = new Vue({
 	el: '#power_frequency',
@@ -14,19 +16,22 @@ let power_frequency = new Vue({
 		// 静态页面效果使用变量
 		static_par: {
 			option_focus: 0, //上方选项卡
-			options: ['电平', '输入', '输出', '矩阵', '混音前增益', '预设'],
-			module_focus: 0,
+			options: ['电平', '输入', '输出', '矩阵', '混音前增益', '预设'], //上方页面选择
+			module_focus: 0, //输入输出模块选择
+			// 输入输出模块名
 			input_modules: [{ name: '输入延时' }, { name: '噪声门' }, { name: '反馈抑制' }, { name: '输入滤波' }, { name: '输入压限' }],
-			output_modules: [{ name: '输出延时' }, { name: '噪声门' }, { name: '反馈抑制' }, { name: '输出滤波' }, { name: '输出压限' }],
-			temp: 0,
-			feedback: false,
-			filter_focus: 0,
-			delay_slider_height: 0,
+			output_modules: [{ name: '输出延时' }, { name: '输出滤波' }, { name: '输出压限' }],
+			temp: 0, //临时输入框变量
+			feedback: false, //反馈抑制开关
+			filter_focus: 0, //滤波器选中
+			delay_slider_height: 0, //延时滑块高度
+			channel_name: '', //显示在输入输出页面的通道名
 		},
 		// 请求数据存放处
 		processor_detail: {
 			Channel_output_list: [],
 			Channel_input_list: [],
+			noise_and_feedback: Object,
 		},
 	},
 	created: function () {
@@ -34,7 +39,7 @@ let power_frequency = new Vue({
 	},
 	mounted: function () {
 		this.resCommonParams.loginToken = window.sessionStorage.loginToken;
-		this.resCommonParams.deviceId = '20211130_105309_3943920187403333';
+		this.resCommonParams.deviceId = '0x333333333333333333000000';
 		this.request('post', processor_detail_url, { id: this.resCommonParams.deviceId }, '74935343174538', this.resCommonParams.loginToken, this.processor_param);
 		this.total_page_loading = false;
 	},
@@ -75,8 +80,8 @@ let power_frequency = new Vue({
 		processor_param: function (res) {
 			console.log(res);
 			// 先建立vue变量 再将获取的值存储进去 vue才能监听到变量的变化
-			this.processor_detail.Channel_input_list = res.data.data.Channel_input;
-			this.processor_detail.Channel_output_list = res.data.data.Channel_output;
+			this.processor_detail.Channel_input_list = res.data.data.in;
+			this.processor_detail.Channel_output_list = res.data.data.out;
 		},
 		// 改变音频条高度
 		change_frequency_height: function (content) {
@@ -92,16 +97,21 @@ let power_frequency = new Vue({
 					case 0:
 						break;
 					case 1:
+						this.static_par.channel_name = `IN${this.processor_detail.Channel_input_list[0].channel_no}`;
+						this.request('post', get_noise_and_feedback_url, { device_id: this.resCommonParams.deviceId, channel_no: 1 }, '123456', this.token, (res) => {
+							this.processor_detail.noise_and_feedback = res.data.data;
+						});
+						this.static_par.module_focus = 0;
 						this.$nextTick(() => {
 							let obj = this.$refs.scroll_display;
-							this.static_par.module_focus = 0;
 							obj.scrollLeft = 0;
 						});
 						break;
 					case 2:
+						this.static_par.channel_name = `OUT${this.processor_detail.Channel_output_list[0].channel_no}`;
+						this.static_par.module_focus = 0;
 						this.$nextTick(() => {
 							let obj = this.$refs.scroll_display;
-							this.static_par.module_focus = 0;
 							obj.scrollLeft = 0;
 						});
 						break;
@@ -111,7 +121,7 @@ let power_frequency = new Vue({
 					case 4:
 						// 给滑块输入框一个临时变量 让每个变量单独维护 在回车确认时再修改原值
 						for (let i = 0; i < this.processor_detail.Channel_input_list.length; i++) {
-							this.$set(this.processor_detail.Channel_input_list[i], 'temp_input', this.processor_detail.Channel_input_list[i].digitalgain);
+							this.$set(this.processor_detail.Channel_input_list[i], 'temp_input', this.processor_detail.Channel_input_list[i].gain);
 							this.$set(this.processor_detail.Channel_input_list[i], 'temp_reverse', 0);
 						}
 						break;
@@ -124,22 +134,36 @@ let power_frequency = new Vue({
 			// 跳转 将offsetLeft置为0
 			let obj = this.$refs.scroll_display;
 			obj.style.scrollBehavior = 'smooth';
-			switch (index) {
-				case 0:
-					obj.scrollLeft = document.getElementById('delay').offsetLeft;
-					break;
-				case 1:
-					obj.scrollLeft = document.getElementById('noise').offsetLeft;
-					break;
-				case 2:
-					obj.scrollLeft = document.getElementById('feedback').offsetLeft;
-					break;
-				case 3:
-					obj.scrollLeft = document.getElementById('filter').offsetLeft;
-					break;
-				case 4:
-					obj.scrollLeft = document.getElementById('press_limit').offsetLeft;
-					break;
+			if (this.static_par.option_focus == 1) {
+				switch (index) {
+					case 0:
+						obj.scrollLeft = document.getElementById('delay').offsetLeft;
+						break;
+					case 1:
+						obj.scrollLeft = document.getElementById('noise').offsetLeft;
+						break;
+					case 2:
+						obj.scrollLeft = document.getElementById('feedback').offsetLeft;
+						break;
+					case 3:
+						obj.scrollLeft = document.getElementById('filter').offsetLeft;
+						break;
+					case 4:
+						obj.scrollLeft = document.getElementById('press_limit').offsetLeft;
+						break;
+				}
+			} else if (this.static_par.option_focus == 2) {
+				switch (index) {
+					case 0:
+						obj.scrollLeft = document.getElementById('delay').offsetLeft;
+						break;
+					case 1:
+						obj.scrollLeft = document.getElementById('filter').offsetLeft;
+						break;
+					case 2:
+						obj.scrollLeft = document.getElementById('press_limit').offsetLeft;
+						break;
+				}
 			}
 			obj.style.scrollBehavior = '';
 		},
@@ -152,7 +176,7 @@ let power_frequency = new Vue({
 			} else {
 				obj.scrollLeft -= 100;
 			}
-			if (this.static_par.option_focus == 1 || this.static_par.option_focus == 2) {
+			if (this.static_par.option_focus == 1) {
 				// 检测滚动位置点亮导航栏
 				let noise = document.getElementById('noise').offsetLeft;
 				let feedback = document.getElementById('feedback').offsetLeft;
@@ -171,6 +195,18 @@ let power_frequency = new Vue({
 					this.static_par.module_focus = 4;
 				}
 			}
+			if (this.static_par.option_focus == 2) {
+				let filter = document.getElementById('filter').offsetLeft;
+				let press_limit = document.getElementById('press_limit').offsetLeft;
+				let scrollLeft = obj.scrollLeft;
+				if (scrollLeft < filter) {
+					this.static_par.module_focus = 0;
+				} else if (scrollLeft >= filter && scrollLeft < press_limit) {
+					this.static_par.module_focus = 1;
+				} else if (scrollLeft >= press_limit) {
+					this.static_par.module_focus = 2;
+				}
+			}
 		},
 		// 反相
 		reverse_off(input) {
@@ -179,7 +215,7 @@ let power_frequency = new Vue({
 			} else {
 				input.temp_reverse = 0;
 			}
-			this.$forceUpdate();
+			// this.$forceUpdate();
 		},
 		// 静音
 		soundOff: function (input) {
@@ -191,8 +227,8 @@ let power_frequency = new Vue({
 			let channelsData = [];
 			let obj = {};
 			obj.mute = input.mute;
-			obj.number = input.number;
-			obj.volume = input.digitalgain;
+			obj.number = input.channel_no;
+			obj.volume = input.gain;
 			channelsData.push(obj);
 			// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
 		},
@@ -207,14 +243,14 @@ let power_frequency = new Vue({
 				} else {
 					input.temp_input = Math.floor(input.temp_input * 10 + 0.5) / 10;
 				}
-				input.digitalgain = input.temp_input;
+				input.gain = input.temp_input;
 
 				// 根据输入改变滑块
 				let channelsData = [];
 				let obj = {};
 				obj.mute = input.mute;
-				obj.number = input.number;
-				obj.volume = input.digitalgain;
+				obj.number = input.channel_no;
+				obj.volume = input.gain;
 				channelsData.push(obj);
 				// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
 			}
@@ -233,11 +269,11 @@ let power_frequency = new Vue({
 			nowY = (nowY / content.offsetHeight) * (12 - -12) + -12;
 			nowY = Math.floor(nowY * 10 + 0.5) / 10;
 			input.temp_input = nowY;
-			input.digitalgain = nowY;
+			input.gain = nowY;
 			let channelsData = [];
 			let obj = {};
 			obj.mute = input.mute;
-			obj.number = input.number;
+			obj.number = input.channel_no;
 			obj.volume = nowY;
 			channelsData.push(obj);
 			// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
@@ -261,14 +297,14 @@ let power_frequency = new Vue({
 				nowY = Math.floor(nowY * 10 + 0.5) / 10;
 				nowY_temp = nowY;
 				// sliderNum和sliderNum_temp不一样 前者是用于显示在面板上 后者用于回调改变滑块高度 两者没有关联关系 仅在面板输入时做了一次等值
-				input.digitalgain = nowY;
+				input.gain = nowY;
 				input.temp_input = nowY;
 			};
 			window.onmouseup = () => {
 				let channelsData = [];
 				let obj = {};
 				obj.mute = input.mute;
-				obj.number = input.number;
+				obj.number = input.channel_no;
 				obj.volume = nowY_temp;
 				channelsData.push(obj);
 				// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
@@ -323,6 +359,39 @@ let power_frequency = new Vue({
 		change_delay_slider_bottom(par) {
 			let temp = (par - -12) / (12 - -12);
 			return `bottom:calc(${temp * 100}% - 10px);`;
+		},
+		// 下发噪声门和反馈控制命令
+		noise_feedback_control() {
+			let params = {
+				device_id: this.resCommonParams.deviceId,
+				channel_no: this.processor_detail.noise_and_feedback.channel_no,
+				noise_gate_status: this.processor_detail.noise_and_feedback.noise_gate_status,
+				threshold: this.processor_detail.noise_and_feedback.threshold,
+				start_time: this.processor_detail.noise_and_feedback.start_time,
+				recover_time: this.processor_detail.noise_and_feedback.recover_time,
+				feedback_suppressor_status: this.processor_detail.noise_and_feedback.feedback_suppressor_status,
+			};
+			this.request('post', push_noise_feedback_url, params, '123456', this.resCommonParams.loginToken, (res) => {
+				this.processor_detail.noise_and_feedback;
+			});
+		},
+		// 噪声按钮
+		noise_button() {
+			if (this.processor_detail.noise_and_feedback.noise_gate_status == 0) {
+				this.processor_detail.noise_and_feedback.noise_gate_status = 1;
+			} else {
+				this.processor_detail.noise_and_feedback.noise_gate_status = 0;
+			}
+			this.noise_feedback_control();
+		},
+		// 反馈抑制按钮
+		feedback_button() {
+			if (this.processor_detail.noise_and_feedback.feedback_suppressor_status == 0) {
+				this.processor_detail.noise_and_feedback.feedback_suppressor_status = 1;
+			} else {
+				this.processor_detail.noise_and_feedback.feedback_suppressor_status = 0;
+			}
+			this.noise_feedback_control();
 		},
 	},
 });

@@ -60,12 +60,12 @@
           <!-- 输入电频 -->
           <div class="frequency_bg">
             <div v-for="input,index in processor_detail.Channel_input_list" class="single_frequency_bar">
-              <span style="font-size: 0.62vw;color: #2865C9;">{{input.level}}</span>
+              <span style="font-size: 0.62vw;color: #2865C9;">{{input.gain}}</span>
               <div class="single_frequency_bar_box">
                 <img src="./img/输入设备电频条.png" style="width: 100%;height: 100%;position: absolute;">
                 <div :style="change_frequency_height(input)" class="input_progress_bar"></div>
               </div>
-              <span style="font-size: 0.62vw;color: #ABCBFF;font-weight: bold;">I{{input.number}}</span>
+              <span style="font-size: 0.62vw;color: #ABCBFF;font-weight: bold;">I{{input.channel_no}}</span>
             </div>
           </div>
         </div>
@@ -74,12 +74,12 @@
           <!-- 输出电频 -->
           <div class="frequency_bg">
             <div v-for="output,index in processor_detail.Channel_output_list" class="single_frequency_bar">
-              <span style="font-size: 0.62vw;color: #2865C9;">{{output.level}}</span>
+              <span style="font-size: 0.62vw;color: #2865C9;">{{output.gain}}</span>
               <div class="single_frequency_bar_box">
                 <img src="./img/输入设备电频条.png" style="width: 100%;height: 100%;position: absolute;">
                 <div :style="change_frequency_height(output)" class="out_progress_bar"></div>
               </div>
-              <span style="font-size: 0.62vw;color: #2998FF;font-weight: bold;">O{{output.number}}</span>
+              <span style="font-size: 0.62vw;color: #2998FF;font-weight: bold;">O{{output.channel_no}}</span>
             </div>
           </div>
         </div>
@@ -108,7 +108,7 @@
           <div class="module_box">
             <!-- 延时 -->
             <div class="single_module_layout delay" id="delay">
-              <span class="title">{{static_par.input_modules[0].name}}</span>
+              <span class="title">{{static_par.channel_name+static_par.input_modules[0].name}}</span>
               <div class="delay_box">
                 <div style="width: 100%;height: 100%;display: grid;align-items: center;justify-items: center;">
                   <div class="input_box" v-for="i in 3">
@@ -133,53 +133,66 @@
             </div>
             <!-- 噪声门 -->
             <div class="single_module_layout noise" id="noise">
-              <span class="title">{{static_par.input_modules[1].name}}</span>
+              <span class="title">{{static_par.channel_name+static_par.input_modules[1].name}}</span>
               <div class="vertical">
                 <div class="row_layout">
                   <span class="module_text_style" style="margin-right: 3.7%;">阈值(db)</span>
                   <div class="input_box" style="margin-right: 6.17%;">
                     <img src="./img/显示数字背景框.png" class="input_bg">
-                    <input v-model.number="static_par.temp" class="input_text">
+                    <input v-model.number="processor_detail.noise_and_feedback.threshold"
+                      @keydown.enter="noise_feedback_control" class="input_text">
                   </div>
-                  <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                  <row-slider :channel="processor_detail.noise_and_feedback.threshold" :slider_max="'0'"
+                    :slider_min="'-120'" :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken"
+                    @slider_num="processor_detail.noise_and_feedback.threshold=$event"
+                    :noise_feedback="processor_detail.noise_and_feedback">
+                  </row-slider>
                 </div>
                 <div class="row_layout">
                   <span class="module_text_style" style="margin-right: 3.7%;">启动时间(ms)</span>
                   <div class="input_box" style="margin-right: 6.17%;">
                     <img src="./img/显示数字背景框.png" class="input_bg">
-                    <input v-model.number="static_par.temp" class="input_text">
+                    <input v-model.number="processor_detail.noise_and_feedback.start_time"
+                      @keydown.enter="noise_feedback_control" class="input_text">
                   </div>
-                  <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                  <row-slider :channel="processor_detail.noise_and_feedback.start_time" :slider_max="'1000'"
+                    :slider_min="'20'" :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken"
+                    @slider_num="processor_detail.noise_and_feedback.start_time=$event"
+                    :noise_feedback="processor_detail.noise_and_feedback"></row-slider>
                 </div>
                 <div class="row_layout">
                   <span class="module_text_style" style="margin-right: 3.7%;">恢复时间(ms)</span>
                   <div class="input_box" style="margin-right: 6.17%;">
                     <img src="./img/显示数字背景框.png" class="input_bg">
-                    <input v-model.number="static_par.temp" class="input_text">
+                    <input v-model.number="processor_detail.noise_and_feedback.recover_time"
+                      @keydown.enter="noise_feedback_control" class="input_text">
                   </div>
-                  <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                  <row-slider :channel="processor_detail.noise_and_feedback.recover_time" :slider_max="'1000'"
+                    :slider_min="'20'" :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken"
+                    @slider_num="processor_detail.noise_and_feedback.recover_time=$event"
+                    :noise_feedback="processor_detail.noise_and_feedback"></row-slider>
                 </div>
-                <div class="button_style">直通</div>
+                <div class="button_style" @mousedown="noise_button"
+                  :style="{boxShadow:processor_detail.noise_and_feedback.noise_gate_status==1?'':'none'}">直通</div>
               </div>
             </div>
             <!-- 反馈抑制 -->
             <div class="single_module_layout feedback_inhibition" id="feedback">
-              <span class="title">{{static_par.input_modules[2].name}}</span>
+              <span class="title">{{static_par.channel_name+static_par.input_modules[2].name}}</span>
               <div class="vertical">
-                <div style="position: relative;width: 74px;height: 32px;cursor: pointer;"
-                  @click="static_par.feedback=!static_par.feedback">
+                <div style="position: relative;width: 74px;height: 32px;cursor: pointer;" @click="feedback_button">
                   <img src="./img/开关槽.png" class="img_bg">
                   <img src="./img/开关球.png"
-                    :style="{width: '30px',height: '100%',position: 'absolute',left:static_par.feedback?'':'0',right:static_par.feedback?'0':''}">
+                    :style="{width: '30px',height: '100%',position: 'absolute',left:processor_detail.noise_and_feedback.feedback_suppressor_status==1?'':'0',right:processor_detail.noise_and_feedback.feedback_suppressor_status==1?'0':''}">
                   <div
-                    :style="{width:static_par.feedback?'96%':'0',height:'100%',background:'#0E67ED',borderRadius:'16px'}">
+                    :style="{width:processor_detail.noise_and_feedback.feedback_suppressor_status==1?'96%':'0',height:'100%',background:'#0E67ED',borderRadius:'16px'}">
                   </div>
                 </div>
               </div>
             </div>
             <!-- 滤波 -->
             <div class="single_module_layout filter" id="filter">
-              <span class="title">{{static_par.input_modules[3].name}}</span>
+              <span class="title">{{static_par.channel_name+static_par.input_modules[3].name}}</span>
               <div class="three_column_layout">
                 <!-- 滤波左下部分 -->
                 <div style="grid-area: b;width: 100%;display: grid;justify-items: center;">
@@ -281,7 +294,7 @@
             </div>
             <!-- 压限 -->
             <div class="single_module_layout press_limit" id="press_limit">
-              <span class="title">{{static_par.input_modules[4].name}}</span>
+              <span class="title">{{static_par.channel_name+static_par.input_modules[4].name}}</span>
               <div class="two_column_layout">
 
                 <div class="vertical" style="grid-column-start: 2;grid-column-end: 3;">
@@ -348,7 +361,7 @@
           <div class="module_box">
             <!-- 延时 -->
             <div class="single_module_layout delay" id="delay">
-              <span class="title">{{static_par.output_modules[0].name}}</span>
+              <span class="title">{{static_par.channel_name+static_par.output_modules[0].name}}</span>
               <div class="delay_box">
                 <div style="width: 100%;height: 100%;display: grid;align-items: center;justify-items: center;">
                   <div class="input_box" v-for="i in 3">
@@ -371,55 +384,9 @@
                 </div> -->
               </div>
             </div>
-            <!-- 噪声门 -->
-            <div class="single_module_layout noise" id="noise">
-              <span class="title">{{static_par.output_modules[1].name}}</span>
-              <div class="vertical">
-                <div class="row_layout">
-                  <span class="module_text_style" style="margin-right: 3.7%;">阈值(db)</span>
-                  <div class="input_box" style="margin-right: 6.17%;">
-                    <img src="./img/显示数字背景框.png" class="input_bg">
-                    <input v-model.number="static_par.temp" class="input_text">
-                  </div>
-                  <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
-                </div>
-                <div class="row_layout">
-                  <span class="module_text_style" style="margin-right: 3.7%;">启动时间(ms)</span>
-                  <div class="input_box" style="margin-right: 6.17%;">
-                    <img src="./img/显示数字背景框.png" class="input_bg">
-                    <input v-model.number="static_par.temp" class="input_text">
-                  </div>
-                  <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
-                </div>
-                <div class="row_layout">
-                  <span class="module_text_style" style="margin-right: 3.7%;">恢复时间(ms)</span>
-                  <div class="input_box" style="margin-right: 6.17%;">
-                    <img src="./img/显示数字背景框.png" class="input_bg">
-                    <input v-model.number="static_par.temp" class="input_text">
-                  </div>
-                  <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
-                </div>
-                <div class="button_style">直通</div>
-              </div>
-            </div>
-            <!-- 反馈抑制 -->
-            <div class="single_module_layout feedback_inhibition" id="feedback">
-              <span class="title">{{static_par.output_modules[2].name}}</span>
-              <div class="vertical">
-                <div style="position: relative;width: 74px;height: 32px;cursor: pointer;"
-                  @click="static_par.feedback=!static_par.feedback">
-                  <img src="./img/开关槽.png" class="img_bg">
-                  <img src="./img/开关球.png"
-                    :style="{width: '30px',height: '100%',position: 'absolute',left:static_par.feedback?'':'0',right:static_par.feedback?'0':''}">
-                  <div
-                    :style="{width:static_par.feedback?'96%':'0',height:'100%',background:'#0E67ED',borderRadius:'16px'}">
-                  </div>
-                </div>
-              </div>
-            </div>
             <!-- 滤波 -->
             <div class="single_module_layout filter" id="filter">
-              <span class="title">{{static_par.output_modules[3].name}}</span>
+              <span class="title">{{static_par.channel_name+static_par.output_modules[1].name}}</span>
               <div class="three_column_layout">
                 <!-- 滤波左下部分 -->
                 <div style="grid-area: b;width: 100%;display: grid;justify-items: center;">
@@ -521,7 +488,7 @@
             </div>
             <!-- 压限 -->
             <div class="single_module_layout press_limit" id="press_limit">
-              <span class="title">{{static_par.output_modules[4].name}}</span>
+              <span class="title">{{static_par.channel_name+static_par.output_modules[2].name}}</span>
               <div class="two_column_layout">
 
                 <div class="vertical" style="grid-column-start: 2;grid-column-end: 3;">
@@ -572,7 +539,7 @@
       <div class="mix_sound scroll_display" v-if="static_par.option_focus==4" @mousewheel="scroll_x($event)"
         ref="scroll_display">
         <div class="single_slider_content" v-for="input,index in processor_detail.Channel_input_list">
-          <div class="slider_name">IN {{input.number}}</div>
+          <div class="slider_name">IN {{input.channel_no}}</div>
           <div class="mix_sound_display">
             <!-- 反相 -->
             <div @click="reverse_off(input)" class="soundOff">
@@ -598,8 +565,8 @@
               <div @mousedown="sliderTurnTo($event,input)" class="slider" ref="slider">
                 <img src="./img/滑块小.png" style="width: 100%;height: 100%;position: absolute;">
                 <div class="slider_bar"></div>
-                <div :style="change_cover_height(input.digitalgain)" class="slider_cover"></div>
-                <div :style="change_slider_bottom(input.digitalgain)" @mousedown.stop="silderMove($event,input)"
+                <div :style="change_cover_height(input.gain)" class="slider_cover"></div>
+                <div :style="change_slider_bottom(input.gain)" @mousedown.stop="silderMove($event,input)"
                   class="slider_img"></div>
               </div>
               <span class="slider_range">-12</span>
@@ -618,8 +585,11 @@
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
         <div class="controlContent">
           <single-slider v-for="input,index in processor_detail.Channel_input_list" :channel="input"
-            :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken" :in_title="'IN'"
-            :out_title="'OUT'" :in_or_out="0" :slider_max="'+12'" :slider_min="'-12'"></single-slider>
+            :token="resCommonParams.loginToken" :in_title="'IN'" :out_title="'OUT'" :in_or_out="0" :slider_max="'+12'"
+            :slider_min="'-12'" @channel_name_event="static_par.channel_name=$event"
+            @option_focus="static_par.option_focus=$event"
+            @noise_feedback_event="processor_detail.noise_and_feedback=$event">
+          </single-slider>
         </div>
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
       </div>
@@ -627,8 +597,10 @@
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
         <div class="controlContent">
           <single-slider v-for="output,index in processor_detail.Channel_output_list" :channel="output"
-            :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken" :in_title="'IN'"
-            :out_title="'OUT'" :in_or_out="1" :slider_max="'+12'" :slider_min="'-12'"></single-slider>
+            :token="resCommonParams.loginToken" :in_title="'IN'" :out_title="'OUT'" :in_or_out="1" :slider_max="'+12'"
+            :slider_min="'-12'" @channel_name_event="static_par.channel_name=$event"
+            @option_focus="static_par.option_focus=$event">
+          </single-slider>
         </div>
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
       </div>
