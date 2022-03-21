@@ -216,13 +216,24 @@ Vue.component('single-slider', {
 		},
 		link_to_in_or_out() {
 			if (this.in_or_out == 0) {
-				let channel_name_temp = `IN${this.channel.channel_no}`;
+				// 查询噪声 反馈信息
 				this.request('post', get_noise_and_feedback_url, { device_id: this.channel.device_id, channel_no: this.channel.channel_no }, '123456', this.token, (res) => {
 					this.$emit('noise_feedback_event', res.data.data);
 				});
+				// 查询延时 压限信息
+				this.request('post', delay_press_limit_url, { device_id: this.channel.device_id, channel_name_no: `channel_in_${this.channel.channel_no}` }, '123456', this.token, (res) => {
+					this.$emit('delay_press_limit_event', res.data.data);
+				});
+				// 切换上方标签选项及文字显示内容
+				let channel_name_temp = `IN${this.channel.channel_no}`;
 				this.$emit('channel_name_event', channel_name_temp);
 				this.$emit('option_focus', 1);
 			} else if (this.in_or_out == 1) {
+				//查询延时 压限信息
+				this.request('post', delay_press_limit_url, { device_id: this.channel.device_id, channel_name_no: `channel_out_${this.channel.channel_no}` }, '123456', this.token, (res) => {
+					this.$emit('delay_press_limit_event', res.data.data);
+				});
+				// 切换上方标签选项及文字显示内容
 				let channel_name_temp = `OUT${this.channel.channel_no}`;
 				this.$emit('channel_name_event', channel_name_temp);
 				this.$emit('option_focus', 2);
@@ -266,7 +277,7 @@ Vue.component('row-slider', {
       </div>
     </div>
   `,
-	props: ['channel', 'slider_max', 'slider_min', 'device_id', 'token', 'noise_feedback'],
+	props: ['channel', 'slider_max', 'slider_min', 'device_id', 'token', 'url', 'params', 'key'],
 	data() {
 		return {
 			slider_thumb: this.channel,
@@ -323,7 +334,7 @@ Vue.component('row-slider', {
 			length = Math.floor(length * 10 + 0.5) / 10;
 			this.slider_thumb = length;
 			this.$emit('slider_num', length);
-			this.noise_feedback_control();
+			this.request('post', this.url, this.params, this.key, this.token, (res) => {});
 		},
 		slider_move(e) {
 			let dom = this.$refs.slider;
@@ -345,7 +356,7 @@ Vue.component('row-slider', {
 				this.$emit('slider_num', length);
 			};
 			window.onmouseup = () => {
-				this.noise_feedback_control();
+				this.request('post', this.url, this.params, this.key, this.token, (res) => {});
 				window.onmousemove = false;
 			};
 		},
@@ -356,19 +367,6 @@ Vue.component('row-slider', {
 		change_slider_left(length) {
 			let left = (length - Number(this.slider_min)) / (Number(this.slider_max) - Number(this.slider_min));
 			return `left:calc(${left * 100}% - 10px);`;
-		},
-		// 噪声及反馈抑制控制
-		noise_feedback_control() {
-			let params = {
-				device_id: this.device_id,
-				channel_no: this.noise_feedback.channel_no,
-				noise_gate_status: this.noise_feedback.noise_gate_status,
-				threshold: this.slider_thumb,
-				start_time: this.noise_feedback.start_time,
-				recover_time: this.noise_feedback.recover_time,
-				feedback_suppressor_status: this.noise_feedback.feedback_suppressor_status,
-			};
-			this.request('post', push_noise_feedback_url, params, '123456', this.token, (res) => {});
 		},
 	},
 });

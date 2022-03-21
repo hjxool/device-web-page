@@ -3,6 +3,7 @@ let processor_detail_url = zhuanyeUrl + 'api/gds/channelDetail';
 let channelControlUrl = zhuanyeUrl + 'api/gds/sendInstruction';
 let get_noise_and_feedback_url = zhuanyeUrl + 'api/gds/getNoiseGateAndFeedbackSuppressorInfo';
 let push_noise_feedback_url = zhuanyeUrl + 'api/gds/noiseGateControl';
+let delay_press_limit_url = zhuanyeUrl + 'api/gds/timeDelayAndPressureLimiter';
 
 let power_frequency = new Vue({
 	el: '#power_frequency',
@@ -29,9 +30,10 @@ let power_frequency = new Vue({
 		},
 		// 请求数据存放处
 		processor_detail: {
-			Channel_output_list: [],
-			Channel_input_list: [],
-			noise_and_feedback: Object,
+			Channel_output_list: [], //输出通道信息
+			Channel_input_list: [], //输入通道信息
+			noise_and_feedback: {}, //噪声门和反馈抑制信息
+			delay_press_limit: {}, //延时和压限信息
 		},
 	},
 	created: function () {
@@ -40,7 +42,7 @@ let power_frequency = new Vue({
 	mounted: function () {
 		this.resCommonParams.loginToken = window.sessionStorage.loginToken;
 		this.resCommonParams.deviceId = '0x333333333333333333000000';
-		this.request('post', processor_detail_url, { id: this.resCommonParams.deviceId }, '74935343174538', this.resCommonParams.loginToken, this.processor_param);
+		this.request('post', processor_detail_url, { device_id: this.resCommonParams.deviceId }, '74935343174538', this.resCommonParams.loginToken, this.processor_param);
 		this.total_page_loading = false;
 	},
 	methods: {
@@ -80,12 +82,12 @@ let power_frequency = new Vue({
 		processor_param: function (res) {
 			console.log(res);
 			// 先建立vue变量 再将获取的值存储进去 vue才能监听到变量的变化
-			this.processor_detail.Channel_input_list = res.data.data.in;
-			this.processor_detail.Channel_output_list = res.data.data.out;
+			this.processor_detail.Channel_input_list = res.data.data.input;
+			this.processor_detail.Channel_output_list = res.data.data.output;
 		},
 		// 改变音频条高度
 		change_frequency_height: function (content) {
-			let temp = (content.level + 100) / 135;
+			let temp = (content.gain - -100) / (35 - -100);
 			return `height:${temp * 100 * 0.87}%;`;
 		},
 		// 切换选项卡
@@ -101,6 +103,9 @@ let power_frequency = new Vue({
 						this.request('post', get_noise_and_feedback_url, { device_id: this.resCommonParams.deviceId, channel_no: 1 }, '123456', this.token, (res) => {
 							this.processor_detail.noise_and_feedback = res.data.data;
 						});
+						this.request('post', delay_press_limit_url, { device_id: this.resCommonParams.deviceId, channel_name_no: 'channel_in_1' }, '123456', this.token, (res) => {
+							this.processor_detail.delay_press_limit = res.data.data;
+						});
 						this.static_par.module_focus = 0;
 						this.$nextTick(() => {
 							let obj = this.$refs.scroll_display;
@@ -109,6 +114,9 @@ let power_frequency = new Vue({
 						break;
 					case 2:
 						this.static_par.channel_name = `OUT${this.processor_detail.Channel_output_list[0].channel_no}`;
+						this.request('post', delay_press_limit_url, { device_id: this.resCommonParams.deviceId, channel_name_no: 'channel_out_1' }, '123456', this.token, (res) => {
+							this.processor_detail.delay_press_limit = res.data.data;
+						});
 						this.static_par.module_focus = 0;
 						this.$nextTick(() => {
 							let obj = this.$refs.scroll_display;
@@ -194,8 +202,7 @@ let power_frequency = new Vue({
 				} else if (scrollLeft >= press_limit) {
 					this.static_par.module_focus = 4;
 				}
-			}
-			if (this.static_par.option_focus == 2) {
+			} else if (this.static_par.option_focus == 2) {
 				let filter = document.getElementById('filter').offsetLeft;
 				let press_limit = document.getElementById('press_limit').offsetLeft;
 				let scrollLeft = obj.scrollLeft;
@@ -255,7 +262,7 @@ let power_frequency = new Vue({
 				// this.request('post', channelControlUrl, { id: this.device_id, channelsData: channelsData }, '123456', this.token, function () {});
 			}
 		},
-		// 滑块功能
+		// 混音滑块功能
 		sliderTurnTo: function (e, input) {
 			let content = this.$refs.slider[0];
 			let nowY = content.offsetHeight - (e.clientY - Math.ceil(content.getBoundingClientRect().top));
@@ -266,7 +273,7 @@ let power_frequency = new Vue({
 				nowY = content.offsetHeight;
 			}
 			// 差值是以0为基准的
-			nowY = (nowY / content.offsetHeight) * (12 - -12) + -12;
+			nowY = (nowY / content.offsetHeight) * (1000 - 0) + 0;
 			nowY = Math.floor(nowY * 10 + 0.5) / 10;
 			input.temp_input = nowY;
 			input.gain = nowY;
@@ -293,7 +300,7 @@ let power_frequency = new Vue({
 				if (nowY > content.offsetHeight) {
 					nowY = content.offsetHeight;
 				}
-				nowY = (nowY / content.offsetHeight) * (12 - -12) + -12;
+				nowY = (nowY / content.offsetHeight) * (1000 - 0) + 0;
 				nowY = Math.floor(nowY * 10 + 0.5) / 10;
 				nowY_temp = nowY;
 				// sliderNum和sliderNum_temp不一样 前者是用于显示在面板上 后者用于回调改变滑块高度 两者没有关联关系 仅在面板输入时做了一次等值
@@ -313,13 +320,29 @@ let power_frequency = new Vue({
 		},
 		// 改变滑块进度条高度
 		change_cover_height: function (par) {
-			let temp = (par - -12) / (12 - -12);
-			return `height:${temp * 100}%;`;
+			if (this.static_par.option_focus == 1) {
+				let temp = (par - 0) / (1000 - 0);
+				return `height:${temp * 100}%;`;
+			} else if (this.static_par.option_focus == 2) {
+				let temp = (par - 0) / (2000 - 0);
+				return `height:${temp * 100}%;`;
+			} else if (this.static_par.option_focus == 4) {
+				let temp = (par - -12) / (12 - -12);
+				return `height:${temp * 100}%;`;
+			}
 		},
 		// 改变滑块离底部距离
 		change_slider_bottom: function (par) {
-			let temp = (par - -12) / (12 - -12);
-			return `bottom:calc(${temp * 100}% - 18px);`;
+			if (this.static_par.option_focus == 1) {
+				let temp = (par - 0) / (1000 - 0);
+				return `bottom:calc(${temp * 100}% - 10px);`;
+			} else if (this.static_par.option_focus == 2) {
+				let temp = (par - 0) / (2000 - 0);
+				return `bottom:calc(${temp * 100}% - 10px);`;
+			} else if (this.static_par.option_focus == 4) {
+				let temp = (par - -12) / (12 - -12);
+				return `bottom:calc(${temp * 100}% - 18px);`;
+			}
 		},
 		// 垂直滑块功能
 		slider_turn_to(e) {
@@ -331,9 +354,13 @@ let power_frequency = new Vue({
 			if (length > dom.offsetHeight) {
 				length = dom.offsetHeight;
 			}
-			length = (length / dom.offsetHeight) * (12 - -12) + -12;
+			if (this.static_par.option_focus == 1) {
+				length = (length / dom.offsetHeight) * (1000 - 0) + 0;
+			} else if (this.static_par.option_focus == 2) {
+				length = (length / dom.offsetHeight) * (2000 - 0) + 0;
+			}
 			length = Math.floor(length * 10 + 0.5) / 10;
-			this.static_par.delay_slider_height = length;
+			this.processor_detail.delay_press_limit.time_delay = length;
 		},
 		slider_move(e) {
 			let dom = this.$refs.delay_slider;
@@ -348,17 +375,17 @@ let power_frequency = new Vue({
 				if (length > dom.offsetHeight) {
 					length = dom.offsetHeight;
 				}
-				length = (length / dom.offsetHeight) * (12 - -12) + -12;
+				if (this.static_par.option_focus == 1) {
+					length = (length / dom.offsetHeight) * (1000 - 0) + 0;
+				} else if (this.static_par.option_focus == 2) {
+					length = (length / dom.offsetHeight) * (2000 - 0) + 0;
+				}
 				length = Math.floor(length * 10 + 0.5) / 10;
-				this.static_par.delay_slider_height = length;
+				this.processor_detail.delay_press_limit.time_delay = length;
 			};
 			window.onmouseup = (e) => {
 				window.onmousemove = false;
 			};
-		},
-		change_delay_slider_bottom(par) {
-			let temp = (par - -12) / (12 - -12);
-			return `bottom:calc(${temp * 100}% - 10px);`;
 		},
 		// 下发噪声门和反馈控制命令
 		noise_feedback_control() {
@@ -392,6 +419,14 @@ let power_frequency = new Vue({
 				this.processor_detail.noise_and_feedback.feedback_suppressor_status = 0;
 			}
 			this.noise_feedback_control();
+		},
+		// 压限按钮
+		press_limit_button() {
+			if (this.processor_detail.delay_press_limit.status == 0) {
+				this.processor_detail.delay_press_limit.status = 1;
+			} else {
+				this.processor_detail.delay_press_limit.status = 0;
+			}
 		},
 	},
 });
