@@ -67,18 +67,53 @@ Vue.component('single-slider', {
 	props: ['channel', 'token', 'in_title', 'out_title', 'in_or_out', 'slider_max', 'slider_min'],
 	data: function () {
 		return {
-			mute: this.channel.mute, //静音
 			sliderNum: Number, //音量
-			sliderNum_temp: Number, //传递给子组件的中间变量
+			//延时信息
+			delay: {
+				device_id: '',
+				channel_name_no: '',
+				time_delay: '',
+			},
+			//压限信息
+			press_limit: {
+				device_id: '',
+				channel_name_no: '',
+				status: '',
+				threshold: '',
+				slope: '',
+				start_time: '',
+				recover_time: '',
+			},
+			// 高通
+			filter_height: {
+				device_id: '',
+				isInput: '',
+				isHigh: 1,
+				status: '',
+				frequency: '',
+				slope: '',
+				type: '',
+				channel_no: '',
+			},
+			// 低通
+			filter_low: {
+				device_id: '',
+				isInput: '',
+				isHigh: 0,
+				status: '',
+				frequency: '',
+				slope: '',
+				type: '',
+				channel_no: '',
+			},
 		};
 	},
 	mounted: function () {
 		this.sliderNum = this.channel.gain;
-		this.sliderNum_temp = this.channel.gain;
 	},
 	methods: {
 		// 封装的请求方法
-		request: function (method, url, data, key, token, func) {
+		request(method, url, data, key, token, func) {
 			axios({
 				method: method,
 				url: url,
@@ -111,29 +146,35 @@ Vue.component('single-slider', {
 		},
 		// 静音
 		soundOff: function () {
-			if (this.mute == 0) {
-				this.mute = 1;
+			if (this.channel.mute == 0) {
+				this.channel.mute = 1;
 			} else {
-				this.mute = 0;
+				this.channel.mute = 0;
 			}
-			let channelsData = [];
 			let obj = {};
-			obj.mute = this.mute;
-			obj.number = this.channel.channel_no;
-			obj.volume = this.sliderNum;
-			channelsData.push(obj);
-			// this.request('post', channelControlUrl, { id: this.channel.device_id, channelsData: channelsData }, '123456', this.token, function () {});
+			obj.mute = this.channel.mute;
+			obj.channel_no = this.channel.channel_no;
+			obj.gain = this.channel.gain;
+			// in_or_out 1为输出 0为输入
+			if (this.in_or_out == 0) {
+				this.request('post', channelControlUrl, { device_id: this.channel.device_id, input: [obj], output: [] }, '123456', this.token, function () {});
+			} else {
+				this.request('post', channelControlUrl, { device_id: this.channel.device_id, input: [], output: [obj] }, '123456', this.token, function () {});
+			}
 		},
 		// 命令下发
 		order_set: function () {
 			// 根据输入改变滑块
-			let channelsData = [];
 			let obj = {};
-			obj.mute = this.mute;
-			obj.number = this.channel.channel_no;
-			obj.volume = this.sliderNum;
-			channelsData.push(obj);
-			// this.request('post', channelControlUrl, { id: this.channel.device_id, channelsData: channelsData }, '123456', this.token, function () {});
+			obj.mute = this.channel.mute;
+			obj.channel_no = this.channel.channel_no;
+			obj.gain = this.channel.gain;
+			// in_or_out 1为输出 0为输入
+			if (this.in_or_out == 0) {
+				this.request('post', channelControlUrl, { device_id: this.channel.device_id, input: [obj], output: [] }, '123456', this.token, function () {});
+			} else {
+				this.request('post', channelControlUrl, { device_id: this.channel.device_id, input: [], output: [obj] }, '123456', this.token, function () {});
+			}
 		},
 		command_send: function () {
 			let reg = /(^\-?\d+$)|(^\+?\d+$)|(^\-?\d+\.\d+$)|(^\+?\d+\.\d+$)/;
@@ -145,12 +186,11 @@ Vue.component('single-slider', {
 				} else {
 					this.sliderNum = Math.floor(this.sliderNum * 10 + 0.5) / 10;
 				}
-				this.sliderNum_temp = this.sliderNum;
+				this.channel.gain = this.sliderNum;
 				this.order_set();
 			}
 		},
 		silderMove: function (e) {
-			let nowY_temp;
 			let content = this.$refs.slider;
 			// 这里滑块是从底下往上渲染 与坐标系相反 所以是用总长-计算出来的尺寸
 			let sliderBottom = content.offsetHeight - e.target.offsetTop - e.target.offsetHeight / 2;
@@ -166,19 +206,21 @@ Vue.component('single-slider', {
 				}
 				nowY = (nowY / content.offsetHeight) * (Number(this.slider_max) - Number(this.slider_min)) + Number(this.slider_min);
 				nowY = Math.floor(nowY * 10 + 0.5) / 10;
-				nowY_temp = nowY;
 				// sliderNum和sliderNum_temp不一样 前者是用于显示在面板上 后者用于回调改变滑块高度 两者没有关联关系 仅在面板输入时做了一次等值
 				this.sliderNum = nowY;
-				this.sliderNum_temp = nowY;
+				this.channel.gain = nowY;
 			};
 			window.onmouseup = () => {
-				let channelsData = [];
 				let obj = {};
-				obj.mute = this.mute;
-				obj.number = this.channel.channel_no;
-				obj.volume = nowY_temp;
-				channelsData.push(obj);
-				// this.request('post', channelControlUrl, { id: this.channel.device_id, channelsData: channelsData }, '123456', this.token, function () {});
+				obj.mute = this.channel.mute;
+				obj.channel_no = this.channel.channel_no;
+				obj.gain = this.channel.gain;
+				// in_or_out 1为输出 0为输入
+				if (this.in_or_out == 0) {
+					this.request('post', channelControlUrl, { device_id: this.channel.device_id, input: [obj], output: [] }, '123456', this.token, function () {});
+				} else {
+					this.request('post', channelControlUrl, { device_id: this.channel.device_id, input: [], output: [obj] }, '123456', this.token, function () {});
+				}
 				window.onmousemove = false;
 			};
 		},
@@ -195,14 +237,17 @@ Vue.component('single-slider', {
 			nowY = (nowY / content.offsetHeight) * (Number(this.slider_max) - Number(this.slider_min)) + Number(this.slider_min);
 			nowY = Math.floor(nowY * 10 + 0.5) / 10;
 			this.sliderNum = nowY;
-			this.sliderNum_temp = nowY;
-			let channelsData = [];
+			this.channel.gain = nowY;
 			let obj = {};
-			obj.mute = this.mute;
-			obj.number = this.channel.channel_no;
-			obj.volume = nowY;
-			channelsData.push(obj);
-			// this.request('post', channelControlUrl, { id: this.channel.device_id, channelsData: channelsData }, '123456', this.token, function () {});
+			obj.mute = this.channel.mute;
+			obj.channel_no = this.channel.channel_no;
+			obj.gain = this.channel.gain;
+			// in_or_out 1为输出 0为输入
+			if (this.in_or_out == 0) {
+				this.request('post', channelControlUrl, { device_id: this.channel.device_id, input: [obj], output: [] }, '123456', this.token, function () {});
+			} else {
+				this.request('post', channelControlUrl, { device_id: this.channel.device_id, input: [], output: [obj] }, '123456', this.token, function () {});
+			}
 		},
 		// 改变滑块进度条高度
 		change_cover_height: function (par) {
@@ -215,6 +260,8 @@ Vue.component('single-slider', {
 			return `bottom:calc(${temp * 100}% - 18px);`;
 		},
 		link_to_in_or_out() {
+			// this.$emit('page_loading_event', true);
+			let channel_name_temp;
 			if (this.in_or_out == 0) {
 				// 查询噪声 反馈信息
 				this.request('post', get_noise_and_feedback_url, { device_id: this.channel.device_id, channel_no: this.channel.channel_no }, '123456', this.token, (res) => {
@@ -222,21 +269,93 @@ Vue.component('single-slider', {
 				});
 				// 查询延时 压限信息
 				this.request('post', delay_press_limit_url, { device_id: this.channel.device_id, channel_name_no: `channel_in_${this.channel.channel_no}` }, '123456', this.token, (res) => {
-					this.$emit('delay_press_limit_event', res.data.data);
+					this.delay_press_assign(res.data.data);
+					// this.$emit('page_loading_event', false);
+				});
+				// 查询滤波 高低通信息
+				this.request('post', filter_low_height_url, { device_id: this.channel.device_id, isInput: 1, channel_no: this.channel.channel_no }, '123456', this.token, (res) => {
+					for (let i = 0; i < res.data.data.length; i++) {
+						if (res.data.data[i].channel_name.indexOf('Low') == -1) {
+							// 高通
+							this.filter_low_height(res.data.data[i], 1, 1);
+						} else {
+							// 低通
+							this.filter_low_height(res.data.data[i], 1, 0);
+						}
+					}
+					this.$emit('filter_height_event', this.filter_height);
+					this.$emit('filter_low_event', this.filter_low);
+				});
+				// 查询滤波均衡
+				this.request('post', filter_peq_url, { device_id: this.channel.device_id, isInput: 1, channel_no: this.channel.channel_no, paragraph_no: 1 }, '123456', this.token, (res) => {
+					this.$emit('filter_peq_event', res.data.data[0]);
 				});
 				// 切换上方标签选项及文字显示内容
-				let channel_name_temp = `IN${this.channel.channel_no}`;
-				this.$emit('channel_name_event', channel_name_temp);
+				channel_name_temp = `IN${this.channel.channel_no}`;
 				this.$emit('option_focus', 1);
 			} else if (this.in_or_out == 1) {
 				//查询延时 压限信息
 				this.request('post', delay_press_limit_url, { device_id: this.channel.device_id, channel_name_no: `channel_out_${this.channel.channel_no}` }, '123456', this.token, (res) => {
-					this.$emit('delay_press_limit_event', res.data.data);
+					this.delay_press_assign(res.data.data);
+				});
+				// 查询滤波 高低通信息
+				this.request('post', filter_low_height_url, { device_id: this.channel.device_id, isInput: 0, channel_no: this.channel.channel_no }, '123456', this.token, (res) => {
+					for (let i = 0; i < res.data.data.length; i++) {
+						if (res.data.data[i].channel_name.indexOf('Low') == -1) {
+							// 高通
+							this.filter_low_height(res.data.data[i], 0, 1);
+						} else {
+							// 低通
+							this.filter_low_height(res.data.data[i], 0, 0);
+						}
+					}
+					this.$emit('filter_height_event', this.filter_height);
+					this.$emit('filter_low_event', this.filter_low);
+				});
+				// 查询滤波均衡
+				this.request('post', filter_peq_url, { device_id: this.channel.device_id, isInput: 0, channel_no: this.channel.channel_no, paragraph_no: 1 }, '123456', this.token, (res) => {
+					this.$emit('filter_peq_event', res.data.data[0]);
 				});
 				// 切换上方标签选项及文字显示内容
-				let channel_name_temp = `OUT${this.channel.channel_no}`;
-				this.$emit('channel_name_event', channel_name_temp);
+				channel_name_temp = `OUT${this.channel.channel_no}`;
 				this.$emit('option_focus', 2);
+			}
+			this.$emit('channel_name_event', channel_name_temp);
+		},
+		// 把同样的赋值语句合并
+		delay_press_assign(res) {
+			this.delay.device_id = res.device_id;
+			this.delay.channel_name_no = res.channel_name_no;
+			this.delay.time_delay = res.time_delay;
+			this.press_limit.device_id = res.device_id;
+			this.press_limit.channel_name_no = res.channel_name_no;
+			this.press_limit.status = res.status;
+			this.press_limit.threshold = res.threshold;
+			this.press_limit.slope = res.slope;
+			this.press_limit.start_time = res.start_time;
+			this.press_limit.recover_time = res.recover_time;
+			this.$emit('delay_event', this.delay);
+			this.$emit('press_limit_event', this.press_limit);
+		},
+		filter_low_height(res, in_out, low_height) {
+			if (low_height == 1) {
+				this.filter_height.device_id = res.device_id;
+				this.filter_height.isInput = in_out;
+				this.filter_height.isHigh = low_height;
+				this.filter_height.status = res.status;
+				this.filter_height.frequency = res.frequency;
+				this.filter_height.slope = res.slope;
+				this.filter_height.type = res.type;
+				this.filter_height.channel_no = res.channel_no;
+			} else if (low_height == 0) {
+				this.filter_low.device_id = res.device_id;
+				this.filter_low.isInput = in_out;
+				this.filter_low.isHigh = low_height;
+				this.filter_low.status = res.status;
+				this.filter_low.frequency = res.frequency;
+				this.filter_low.slope = res.slope;
+				this.filter_low.type = res.type;
+				this.filter_low.channel_no = res.channel_no;
 			}
 		},
 	},
@@ -245,8 +364,8 @@ Vue.component('single-slider', {
           <div class="slider_name">{{in_or_out==0?in_title:out_title}} {{channel.channel_no}}</div>
           <div class="slider_display">
             <div @mousedown.stop="soundOff" class="soundOff">
-              <img :src="[mute==0?'./img/静音通常.png':'./img/静音.png']" style="position: absolute;width: 100%;height: 100%;">
-              <span :style="{fontSize: '12px',color:mute==0?'#ABCBFF':'#FFABCF',zIndex:'1'}">静音</span>
+              <img :src="[this.channel.mute==0?'./img/静音通常.png':'./img/静音.png']" style="position: absolute;width: 100%;height: 100%;">
+              <span :style="{fontSize: '12px',color:this.channel.mute==0?'#ABCBFF':'#FFABCF',zIndex:'1'}">静音</span>
             </div>
             <div class="slider_num">
               <input @keyup.enter="command_send" v-model.number="sliderNum" maxlength="5" class="slider_num_input">
@@ -257,8 +376,8 @@ Vue.component('single-slider', {
               <div @mousedown="sliderTurnTo($event)" class="slider" ref="slider">
                 <img src="./img/滑块小.png" style="width: 100%;height: 100%;position: absolute;">
                 <div class="slider_bar"></div>
-                <div :style="change_cover_height(sliderNum_temp)" class="slider_cover"></div>
-                <div :style="change_slider_bottom(sliderNum_temp)" @mousedown.stop="silderMove($event)" class="slider_img"></div>
+                <div :style="change_cover_height(channel.gain)" class="slider_cover"></div>
+                <div :style="change_slider_bottom(channel.gain)" @mousedown.stop="silderMove($event)" class="slider_img"></div>
               </div>
               <span class="slider_range">{{slider_min}}</span>
             </div>
@@ -277,7 +396,7 @@ Vue.component('row-slider', {
       </div>
     </div>
   `,
-	props: ['channel', 'slider_max', 'slider_min', 'device_id', 'token', 'url', 'params', 'key'],
+	props: ['channel', 'slider_max', 'slider_min', 'token', 'url_params', 'params', 'key_params'],
 	data() {
 		return {
 			slider_thumb: this.channel,
@@ -290,7 +409,7 @@ Vue.component('row-slider', {
 	},
 	methods: {
 		// 封装的请求方法
-		request: function (method, url, data, key, token, func) {
+		request(method, url, data, key, token, func) {
 			axios({
 				method: method,
 				url: url,
@@ -334,7 +453,7 @@ Vue.component('row-slider', {
 			length = Math.floor(length * 10 + 0.5) / 10;
 			this.slider_thumb = length;
 			this.$emit('slider_num', length);
-			this.request('post', this.url, this.params, this.key, this.token, (res) => {});
+			this.request('post', this.url_params, this.params, this.key_params, this.token, (res) => {});
 		},
 		slider_move(e) {
 			let dom = this.$refs.slider;
@@ -356,7 +475,7 @@ Vue.component('row-slider', {
 				this.$emit('slider_num', length);
 			};
 			window.onmouseup = () => {
-				this.request('post', this.url, this.params, this.key, this.token, (res) => {});
+				this.request('post', this.url_params, this.params, this.key_params, this.token, (res) => {});
 				window.onmousemove = false;
 			};
 		},

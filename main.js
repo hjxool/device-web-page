@@ -1,0 +1,14 @@
+let zhuanyeUrl = 'http://192.168.30.66:18113/';
+let processor_detail_url = zhuanyeUrl + 'api/gds/channelDetail';
+let channelControlUrl = zhuanyeUrl + 'api/gds/sendInstruction';
+let get_noise_and_feedback_url = zhuanyeUrl + 'api/gds/getNoiseGateAndFeedbackSuppressorInfo';
+let push_noise_feedback_url = zhuanyeUrl + 'api/gds/noiseGateControl';
+let delay_press_limit_url = zhuanyeUrl + 'api/gds/timeDelayAndPressureLimiter';
+let push_press_limit_url = zhuanyeUrl + 'api/gds/pressureLimiterControl';
+let push_delay_url = zhuanyeUrl + 'api/gds/timeDelayControl';
+let filter_low_height_url = zhuanyeUrl + 'api/gds/getFilterInfo';
+let push_low_height_url = zhuanyeUrl + 'api/gds/filterControl';
+let filter_peq_url = zhuanyeUrl + 'api/gds/getPEQInfo';
+let push_filter_peq_url = zhuanyeUrl + 'api/gds/peqControl';
+let before_mix_gain_url = zhuanyeUrl + 'api/gds/getBeforeMixingInfo';
+let push_before_mix_gain_url = zhuanyeUrl + 'api/gds/beforeMixingControl';

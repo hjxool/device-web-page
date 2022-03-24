@@ -113,17 +113,14 @@
                 <div style="width: 100%;height: 100%;display: grid;align-items: center;justify-items: center;">
                   <div class="input_box" v-for="i in 3">
                     <img src="./img/显示数字背景框.png" class="input_bg">
-                    <span
-                      style="font-size: 12px;color: #abcbff;">{{processor_detail.delay_press_limit.time_delay}}</span>
+                    <span style="font-size: 12px;color: #abcbff;">{{processor_detail.delay.time_delay}}</span>
                   </div>
                 </div>
                 <div class="row_slider_box" @mousedown="slider_turn_to($event)" ref="delay_slider"
                   style="height:78%;align-self: center;">
                   <div class="slider_bg"></div>
-                  <div class="delay_slider_cover"
-                    :style="change_cover_height(processor_detail.delay_press_limit.time_delay)"></div>
-                  <div class="delay_slider_thumb"
-                    :style="change_slider_bottom(processor_detail.delay_press_limit.time_delay)"
+                  <div class="delay_slider_cover" :style="change_cover_height(processor_detail.delay.time_delay)"></div>
+                  <div class="delay_slider_thumb" :style="change_slider_bottom(processor_detail.delay.time_delay)"
                     @mousedown.stop="slider_move($event)">
                     <img draggable="false" src="./img/滑块2.png" style="width:100%;height:100%;">
                   </div>
@@ -146,9 +143,10 @@
                       style="font-size: 12px;color: #abcbff;">{{processor_detail.noise_and_feedback.threshold}}</span>
                   </div>
                   <row-slider :channel="processor_detail.noise_and_feedback.threshold" :slider_max="'0'"
-                    :slider_min="'-120'" :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken"
-                    @slider_num="processor_detail.noise_and_feedback.threshold=$event" :url="push_noise_feedback_url"
-                    :params="processor_detail.noise_and_feedback" :key="'123456'">
+                    :slider_min="'-120'" :token="resCommonParams.loginToken"
+                    @slider_num="processor_detail.noise_and_feedback.threshold=$event"
+                    :url_params="resCommonParams.push_noise_feedback_url" :params="processor_detail.noise_and_feedback"
+                    :key_params="'123456'">
                   </row-slider>
                 </div>
                 <div class="row_layout">
@@ -159,9 +157,10 @@
                       style="font-size: 12px;color: #abcbff;">{{processor_detail.noise_and_feedback.start_time}}</span>
                   </div>
                   <row-slider :channel="processor_detail.noise_and_feedback.start_time" :slider_max="'1000'"
-                    :slider_min="'20'" :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken"
-                    @slider_num="processor_detail.noise_and_feedback.start_time=$event" :url="push_noise_feedback_url"
-                    :params="processor_detail.noise_and_feedback" :key="'123456'"></row-slider>
+                    :slider_min="'20'" :token="resCommonParams.loginToken"
+                    @slider_num="processor_detail.noise_and_feedback.start_time=$event"
+                    :url_params="resCommonParams.push_noise_feedback_url" :params="processor_detail.noise_and_feedback"
+                    :key_params="'123456'"></row-slider>
                 </div>
                 <div class="row_layout">
                   <span class="module_text_style" style="margin-right: 3.7%;">恢复时间(ms)</span>
@@ -171,9 +170,10 @@
                       style="font-size: 12px;color: #abcbff;">{{processor_detail.noise_and_feedback.recover_time}}</span>
                   </div>
                   <row-slider :channel="processor_detail.noise_and_feedback.recover_time" :slider_max="'1000'"
-                    :slider_min="'20'" :device_id="resCommonParams.deviceId" :token="resCommonParams.loginToken"
-                    @slider_num="processor_detail.noise_and_feedback.recover_time=$event" :url="push_noise_feedback_url"
-                    :params="processor_detail.noise_and_feedback" :key="'123456'"></row-slider>
+                    :slider_min="'20'" :token="resCommonParams.loginToken"
+                    @slider_num="processor_detail.noise_and_feedback.recover_time=$event"
+                    :url_params="resCommonParams.push_noise_feedback_url" :params="processor_detail.noise_and_feedback"
+                    :key_params="'123456'"></row-slider>
                 </div>
                 <div class="button_style" @mousedown="noise_button"
                   :style="{boxShadow:processor_detail.noise_and_feedback.noise_gate_status==1?'':'none'}">直通</div>
@@ -201,96 +201,223 @@
                 <div style="grid-area: b;width: 100%;display: grid;justify-items: center;">
                   <div style="display: flex;align-items: center;">
                     <span class="module_text_style">滤波</span>
-                    <div v-for="i in 16" @click="static_par.filter_focus=i" class="filter_focus"
-                      :style="{color:static_par.filter_focus==i?'#ABCBFF':'#ABCBFF'}">{{i}}
-                      <img :src="static_par.filter_focus==i?'./img/滤波选项亮.png':'./img/滤波选项暗.png'" class="img_bg">
+                    <div v-for="i,index in 16" @click="res_filter_peq(i)" class="filter_focus"
+                      :style="{color:static_par.filter_peq_section==i?'#ABCBFF':'#ABCBFF'}">{{i}}
+                      <img :src="static_par.filter_peq_section==i?'./img/滤波选项亮.png':'./img/滤波选项暗.png'" class="img_bg">
                     </div>
                   </div>
                   <div style="width: 100%;justify-content: space-around;" class="row_layout">
                     <span class="module_text_style">频率(Hz)</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.filter_peq.frequency}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'" style="width: 11%;">
+                    <row-slider :channel="processor_detail.filter_peq.frequency" :slider_max="'20000'"
+                      :slider_min="'20'" :token="resCommonParams.loginToken"
+                      @slider_num="processor_detail.filter_peq.frequency=$event"
+                      :url_params="resCommonParams.push_filter_peq_url" :params="processor_detail.filter_peq"
+                      :key_params="'123456'" style="width: 11%;">
                     </row-slider>
                     <span class="module_text_style">增益(dB)</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.filter_peq.gain}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'" style="width: 11%;">
+                    <row-slider :channel="processor_detail.filter_peq.gain" :slider_max="'20'" :slider_min="'-20'"
+                      :token="resCommonParams.loginToken" @slider_num="processor_detail.filter_peq.gain=$event"
+                      :url_params="resCommonParams.push_filter_peq_url" :params="processor_detail.filter_peq"
+                      :key_params="'123456'" style="width: 11%;">
                     </row-slider>
                     <span class="module_text_style">Q</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.filter_peq.q_value}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'" style="width: 11%;">
+                    <row-slider :channel="processor_detail.filter_peq.q_value" :slider_max="'64'" :slider_min="'0'"
+                      :token="resCommonParams.loginToken" @slider_num="processor_detail.filter_peq.q_value=$event"
+                      :url_params="resCommonParams.push_filter_peq_url" :params="processor_detail.filter_peq"
+                      :key_params="'123456'" style="width: 11%;">
                     </row-slider>
-                    <div class="button_style">直通</div>
+                    <div class="button_style" @mousedown="filter_peq_button"
+                      :style="{boxShadow:processor_detail.filter_peq.status==1?'':'none'}">直通</div>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <div class="option_box">
+                        <span v-show="processor_detail.filter_peq.type==0"
+                          style="font-size: 12px;color: #ABCBFF;">参数均衡</span>
+                        <span v-show="processor_detail.filter_peq.type==1"
+                          style="font-size: 12px;color: #ABCBFF;">低架均衡</span>
+                        <span v-show="processor_detail.filter_peq.type==2"
+                          style="font-size: 12px;color: #ABCBFF;">高架均衡</span>
+                        <img src="./img/icon2.png" style="width: 9px;height: 6px;"
+                          @mousedown="static_par.fliter_peq_type=!static_par.fliter_peq_type">
+                        <!-- 选项框 -->
+                        <div class="option_selcet" v-show="static_par.fliter_peq_type"
+                          style="height: 90px;grid-template-rows: repeat(3,1fr);bottom: -300%;">
+                          <img src="./img/显示数字背景框.png" class="input_bg">
+                          <span @mousedown="fliter_peq_type_select(0)"
+                            style="font-size: 12px;color: #ABCBFF;">参数均衡</span>
+                          <span @mousedown="fliter_peq_type_select(1)"
+                            style="font-size: 12px;color: #ABCBFF;">低架均衡</span>
+                          <span @mousedown="fliter_peq_type_select(2)"
+                            style="font-size: 12px;color: #ABCBFF;">高架均衡</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <!-- 滤波中间 -->
+                <!-- 高通 -->
                 <div class="vertical" style="grid-area: c;width: 100%;height: 100%;">
                   <div class="col_line" style="left: 0;"></div>
-
                   <span style="font-size: 14px;color: #355CBB;">高通</span>
                   <div class="row_layout">
                     <span class="module_text_style" style="margin-right: 3.7%;">频率(Hz)</span>
                     <div class="input_box" style="margin-right: 6.5%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.filter_height.frequency}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.filter_height.frequency" :slider_max="'20000'"
+                      :slider_min="'20'" :token="resCommonParams.loginToken"
+                      @slider_num="processor_detail.filter_height.frequency=$event"
+                      :url_params="resCommonParams.push_low_height_url" :params="processor_detail.filter_height"
+                      :key_params="'123456'"></row-slider>
                   </div>
                   <div class="row_layout" style="justify-content: start;">
                     <span class="module_text_style" style="margin-right: 8.5%;">类型</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <div class="option_box">
+                        <span v-show="processor_detail.filter_height.type==0"
+                          style="font-size: 12px;color: #ABCBFF;">贝塞尔</span>
+                        <span v-show="processor_detail.filter_height.type==1"
+                          style="font-size: 12px;color: #ABCBFF;">巴特沃斯</span>
+                        <span v-show="processor_detail.filter_height.type==2"
+                          style="font-size: 12px;color: #ABCBFF;">林克威治-瑞利</span>
+                        <img src="./img/icon2.png" style="width: 9px;height: 6px;"
+                          @mousedown="static_par.filter_height_type=!static_par.filter_height_type">
+                        <!-- 选项框 -->
+                        <div class="option_selcet" v-show="static_par.filter_height_type"
+                          style="height: 90px;grid-template-rows: repeat(3,1fr);bottom: -300%;">
+                          <img src="./img/显示数字背景框.png" class="input_bg">
+                          <span @mousedown="low_height_type(0,1)" style="font-size: 12px;color: #ABCBFF;">贝塞尔</span>
+                          <span @mousedown="low_height_type(1,1)" style="font-size: 12px;color: #ABCBFF;">巴特沃斯</span>
+                          <span @mousedown="low_height_type(2,1)" style="font-size: 12px;color: #ABCBFF;">林克威治-瑞利</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="row_layout">
                     <span class="module_text_style">斜率</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <div class="option_box">
+                        <span v-show="processor_detail.filter_height.slope==0"
+                          style="font-size: 12px;color: #ABCBFF;">-6dB/oct</span>
+                        <span v-show="processor_detail.filter_height.slope==1"
+                          style="font-size: 12px;color: #ABCBFF;">-12</span>
+                        <span v-show="processor_detail.filter_height.slope==2"
+                          style="font-size: 12px;color: #ABCBFF;">-18</span>
+                        <span v-show="processor_detail.filter_height.slope==3"
+                          style="font-size: 12px;color: #ABCBFF;">-24</span>
+                        <span v-show="processor_detail.filter_height.slope==4"
+                          style="font-size: 12px;color: #ABCBFF;">-36</span>
+                        <span v-show="processor_detail.filter_height.slope==5"
+                          style="font-size: 12px;color: #ABCBFF;">-48</span>
+                        <img src="./img/icon2.png" style="width: 9px;height: 6px;"
+                          @mousedown="static_par.filter_height_slope=!static_par.filter_height_slope">
+                        <!-- 选项框 -->
+                        <div class="option_selcet" v-show="static_par.filter_height_slope"
+                          style="height: 180px;grid-template-rows: repeat(6,1fr);bottom: -600%;">
+                          <img src="./img/显示数字背景框.png" class="input_bg">
+                          <span @mousedown="low_height_slope(0,1)"
+                            style="font-size: 12px;color: #ABCBFF;">-6dB/oct</span>
+                          <span @mousedown="low_height_slope(1,1)" style="font-size: 12px;color: #ABCBFF;">-12</span>
+                          <span @mousedown="low_height_slope(2,1)" style="font-size: 12px;color: #ABCBFF;">-18</span>
+                          <span @mousedown="low_height_slope(3,1)" style="font-size: 12px;color: #ABCBFF;">-24</span>
+                          <span @mousedown="low_height_slope(4,1)" style="font-size: 12px;color: #ABCBFF;">-36</span>
+                          <span @mousedown="low_height_slope(5,1)" style="font-size: 12px;color: #ABCBFF;">-48</span>
+                        </div>
+                      </div>
                     </div>
-                    <div class="button_style">直通</div>
+                    <div class="button_style" @mousedown="low_height_button(1)"
+                      :style="{boxShadow:processor_detail.filter_height.status==1?'':'none'}">直通</div>
                   </div>
-
                   <div class="col_line" style="right: 0;"></div>
                 </div>
-                <!-- 滤波右边 -->
+                <!-- 低通 -->
                 <div class="vertical" style="grid-area: d;width: 100%;height: 100%;">
                   <span style="font-size: 14px;color: #355CBB;">低通</span>
                   <div class="row_layout">
                     <span class="module_text_style" style="margin-right: 3.7%;">频率(Hz)</span>
                     <div class="input_box" style="margin-right: 6.5%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.filter_low.frequency}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.filter_height.frequency" :slider_max="'20000'"
+                      :slider_min="'20'" :token="resCommonParams.loginToken"
+                      @slider_num="processor_detail.filter_low.frequency=$event"
+                      :url_params="resCommonParams.push_low_height_url" :params="processor_detail.filter_low"
+                      :key_params="'123456'"></row-slider>
                   </div>
                   <div class="row_layout" style="justify-content: start;">
                     <span class="module_text_style" style="margin-right: 8.5%;">类型</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <div class="option_box">
+                        <span v-show="processor_detail.filter_low.type==0"
+                          style="font-size: 12px;color: #ABCBFF;">贝塞尔</span>
+                        <span v-show="processor_detail.filter_low.type==1"
+                          style="font-size: 12px;color: #ABCBFF;">巴特沃斯</span>
+                        <span v-show="processor_detail.filter_low.type==2"
+                          style="font-size: 12px;color: #ABCBFF;">林克威治-瑞利</span>
+                        <img src="./img/icon2.png" style="width: 9px;height: 6px;"
+                          @mousedown="static_par.filter_low_type=!static_par.filter_low_type">
+                        <!-- 选项框 -->
+                        <div class="option_selcet" v-show="static_par.filter_low_type"
+                          style="height: 90px;grid-template-rows: repeat(3,1fr);bottom: -300%;">
+                          <img src="./img/显示数字背景框.png" class="input_bg">
+                          <span @mousedown="low_height_type(0,0)" style="font-size: 12px;color: #ABCBFF;">贝塞尔</span>
+                          <span @mousedown="low_height_type(1,0)" style="font-size: 12px;color: #ABCBFF;">巴特沃斯</span>
+                          <span @mousedown="low_height_type(2,0)" style="font-size: 12px;color: #ABCBFF;">林克威治-瑞利</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="row_layout">
                     <span class="module_text_style">斜率</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <div class="option_box">
+                        <span v-show="processor_detail.filter_low.slope==0"
+                          style="font-size: 12px;color: #ABCBFF;">-6dB/oct</span>
+                        <span v-show="processor_detail.filter_low.slope==1"
+                          style="font-size: 12px;color: #ABCBFF;">-12</span>
+                        <span v-show="processor_detail.filter_low.slope==2"
+                          style="font-size: 12px;color: #ABCBFF;">-18</span>
+                        <span v-show="processor_detail.filter_low.slope==3"
+                          style="font-size: 12px;color: #ABCBFF;">-24</span>
+                        <span v-show="processor_detail.filter_low.slope==4"
+                          style="font-size: 12px;color: #ABCBFF;">-36</span>
+                        <span v-show="processor_detail.filter_low.slope==5"
+                          style="font-size: 12px;color: #ABCBFF;">-48</span>
+                        <img src="./img/icon2.png" style="width: 9px;height: 6px;"
+                          @mousedown="static_par.filter_low_slope=!static_par.filter_low_slope">
+                        <!-- 选项框 -->
+                        <div class="option_selcet" v-show="static_par.filter_low_slope"
+                          style="height: 180px;grid-template-rows: repeat(6,1fr);bottom: -600%;">
+                          <img src="./img/显示数字背景框.png" class="input_bg">
+                          <span @mousedown="low_height_slope(0,0)"
+                            style="font-size: 12px;color: #ABCBFF;">-6dB/oct</span>
+                          <span @mousedown="low_height_slope(1,0)" style="font-size: 12px;color: #ABCBFF;">-12</span>
+                          <span @mousedown="low_height_slope(2,0)" style="font-size: 12px;color: #ABCBFF;">-18</span>
+                          <span @mousedown="low_height_slope(3,0)" style="font-size: 12px;color: #ABCBFF;">-24</span>
+                          <span @mousedown="low_height_slope(4,0)" style="font-size: 12px;color: #ABCBFF;">-36</span>
+                          <span @mousedown="low_height_slope(5,0)" style="font-size: 12px;color: #ABCBFF;">-48</span>
+                        </div>
+                      </div>
                     </div>
-                    <div class="button_style">直通</div>
+                    <div class="button_style" @mousedown="low_height_button(0)"
+                      :style="{boxShadow:processor_detail.filter_low.status==1?'':'none'}">直通</div>
                   </div>
                 </div>
               </div>
@@ -304,39 +431,52 @@
                     <span class="module_text_style" style="margin-right: 3.7%;">阈值(db)</span>
                     <div class="input_box" style="margin-right: 6.17%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <span
-                        style="font-size: 12px;color: #abcbff;">{{processor_detail.delay_press_limit.threshold}}</span>
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.press_limit.threshold}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.press_limit.threshold" :slider_max="'0'" :slider_min="'-120'"
+                      :token="resCommonParams.loginToken" :key_params="'123456'"
+                      :url_params="resCommonParams.push_press_limit_url" :params="processor_detail.press_limit"
+                      @slider_num="processor_detail.press_limit.threshold=$event">
+                    </row-slider>
                   </div>
                   <div class="row_layout">
                     <span class="module_text_style" style="margin-right: 3.7%;">斜率</span>
                     <div class="input_box" style="margin-right: 6.17%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.delay_press_limit.slope}}</span>
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.press_limit.slope}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.press_limit.slope" :slider_max="'100'" :slider_min="'1'"
+                      :token="resCommonParams.loginToken" :key_params="'123456'"
+                      :url_params="resCommonParams.push_press_limit_url" :params="processor_detail.press_limit"
+                      @slider_num="processor_detail.press_limit.slope=$event">
+                    </row-slider>
                   </div>
                   <div class="row_layout">
                     <span class="module_text_style" style="margin-right: 3.7%;">启动时间(ms)</span>
                     <div class="input_box" style="margin-right: 6.17%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <span
-                        style="font-size: 12px;color: #abcbff;">{{processor_detail.delay_press_limit.start_time}}</span>
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.press_limit.start_time}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.press_limit.start_time" :slider_max="'1000'"
+                      :slider_min="'20'" :token="resCommonParams.loginToken" :key_params="'123456'"
+                      :url_params="resCommonParams.push_press_limit_url" :params="processor_detail.press_limit"
+                      @slider_num="processor_detail.press_limit.start_time=$event">
+                    </row-slider>
                   </div>
                   <div class="row_layout">
                     <span class="module_text_style" style="margin-right: 3.7%;">恢复时间(ms)</span>
                     <div class="input_box" style="margin-right: 6.17%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <span
-                        style="font-size: 12px;color: #abcbff;">{{processor_detail.delay_press_limit.recover_time}}</span>
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.press_limit.recover_time}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.press_limit.recover_time" :slider_max="'1000'"
+                      :slider_min="'20'" :token="resCommonParams.loginToken" :key_params="'123456'"
+                      :url_params="resCommonParams.push_press_limit_url" :params="processor_detail.press_limit"
+                      @slider_num="processor_detail.press_limit.recover_time=$event">
+                    </row-slider>
                   </div>
                   <div class="button_style" @mousedown="press_limit_button"
-                    :style="{boxShadow:processor_detail.delay_press_limit.status==1?'':'none'}">直通</div>
+                    :style="{boxShadow:processor_detail.press_limit.status==1?'':'none'}">直通</div>
                 </div>
               </div>
             </div>
@@ -372,17 +512,14 @@
                 <div style="width: 100%;height: 100%;display: grid;align-items: center;justify-items: center;">
                   <div class="input_box" v-for="i in 3">
                     <img src="./img/显示数字背景框.png" class="input_bg">
-                    <span
-                      style="font-size: 12px;color: #abcbff;">{{processor_detail.delay_press_limit.time_delay}}</span>
+                    <span style="font-size: 12px;color: #abcbff;">{{processor_detail.delay.time_delay}}</span>
                   </div>
                 </div>
                 <div class="row_slider_box" @mousedown="slider_turn_to($event)" ref="delay_slider"
                   style="height:78%;align-self: center;">
                   <div class="slider_bg"></div>
-                  <div class="delay_slider_cover"
-                    :style="change_cover_height(processor_detail.delay_press_limit.time_delay)"></div>
-                  <div class="delay_slider_thumb"
-                    :style="change_slider_bottom(processor_detail.delay_press_limit.time_delay)"
+                  <div class="delay_slider_cover" :style="change_cover_height(processor_detail.delay.time_delay)"></div>
+                  <div class="delay_slider_thumb" :style="change_slider_bottom(processor_detail.delay.time_delay)"
                     @mousedown.stop="slider_move($event)">
                     <img draggable="false" src="./img/滑块2.png" style="width:100%;height:100%;">
                   </div>
@@ -401,96 +538,223 @@
                 <div style="grid-area: b;width: 100%;display: grid;justify-items: center;">
                   <div style="display: flex;align-items: center;">
                     <span class="module_text_style">滤波</span>
-                    <div v-for="i in 16" @click="static_par.filter_focus=i" class="filter_focus"
-                      :style="{color:static_par.filter_focus==i?'#ABCBFF':'#ABCBFF'}">{{i}}
-                      <img :src="static_par.filter_focus==i?'./img/滤波选项亮.png':'./img/滤波选项暗.png'" class="img_bg">
+                    <div v-for="i,index in 16" @click="res_filter_peq(i)" class="filter_focus"
+                      :style="{color:static_par.filter_peq_section==i?'#ABCBFF':'#ABCBFF'}">{{i}}
+                      <img :src="static_par.filter_peq_section==i?'./img/滤波选项亮.png':'./img/滤波选项暗.png'" class="img_bg">
                     </div>
                   </div>
                   <div style="width: 100%;justify-content: space-around;" class="row_layout">
                     <span class="module_text_style">频率(Hz)</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.filter_peq.frequency}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'" style="width: 11%;">
+                    <row-slider :channel="processor_detail.filter_peq.frequency" :slider_max="'20000'"
+                      :slider_min="'20'" :token="resCommonParams.loginToken"
+                      @slider_num="processor_detail.filter_peq.frequency=$event"
+                      :url_params="resCommonParams.push_filter_peq_url" :params="processor_detail.filter_peq"
+                      :key_params="'123456'" style="width: 11%;">
                     </row-slider>
                     <span class="module_text_style">增益(dB)</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.filter_peq.gain}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'" style="width: 11%;">
+                    <row-slider :channel="processor_detail.filter_peq.gain" :slider_max="'20'" :slider_min="'-20'"
+                      :token="resCommonParams.loginToken" @slider_num="processor_detail.filter_peq.gain=$event"
+                      :url_params="resCommonParams.push_filter_peq_url" :params="processor_detail.filter_peq"
+                      :key_params="'123456'" style="width: 11%;">
                     </row-slider>
                     <span class="module_text_style">Q</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.filter_peq.q_value}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'" style="width: 11%;">
+                    <row-slider :channel="processor_detail.filter_peq.q_value" :slider_max="'64'" :slider_min="'0'"
+                      :token="resCommonParams.loginToken" @slider_num="processor_detail.filter_peq.q_value=$event"
+                      :url_params="resCommonParams.push_filter_peq_url" :params="processor_detail.filter_peq"
+                      :key_params="'123456'" style="width: 11%;">
                     </row-slider>
-                    <div class="button_style">直通</div>
+                    <div class="button_style" @mousedown="filter_peq_button"
+                      :style="{boxShadow:processor_detail.filter_peq.status==1?'':'none'}">直通</div>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <div class="option_box">
+                        <span v-show="processor_detail.filter_peq.type==0"
+                          style="font-size: 12px;color: #ABCBFF;">参数均衡</span>
+                        <span v-show="processor_detail.filter_peq.type==1"
+                          style="font-size: 12px;color: #ABCBFF;">低架均衡</span>
+                        <span v-show="processor_detail.filter_peq.type==2"
+                          style="font-size: 12px;color: #ABCBFF;">高架均衡</span>
+                        <img src="./img/icon2.png" style="width: 9px;height: 6px;"
+                          @mousedown="static_par.fliter_peq_type=!static_par.fliter_peq_type">
+                        <!-- 选项框 -->
+                        <div class="option_selcet" v-show="static_par.fliter_peq_type"
+                          style="height: 90px;grid-template-rows: repeat(3,1fr);bottom: -300%;">
+                          <img src="./img/显示数字背景框.png" class="input_bg">
+                          <span @mousedown="fliter_peq_type_select(0)"
+                            style="font-size: 12px;color: #ABCBFF;">参数均衡</span>
+                          <span @mousedown="fliter_peq_type_select(1)"
+                            style="font-size: 12px;color: #ABCBFF;">低架均衡</span>
+                          <span @mousedown="fliter_peq_type_select(2)"
+                            style="font-size: 12px;color: #ABCBFF;">高架均衡</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <!-- 滤波中间 -->
+                <!-- 高通 -->
                 <div class="vertical" style="grid-area: c;width: 100%;height: 100%;">
                   <div class="col_line" style="left: 0;"></div>
-
                   <span style="font-size: 14px;color: #355CBB;">高通</span>
                   <div class="row_layout">
                     <span class="module_text_style" style="margin-right: 3.7%;">频率(Hz)</span>
                     <div class="input_box" style="margin-right: 6.5%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.filter_height.frequency}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.filter_height.frequency" :slider_max="'20000'"
+                      :slider_min="'20'" :token="resCommonParams.loginToken"
+                      @slider_num="processor_detail.filter_height.frequency=$event"
+                      :url_params="resCommonParams.push_low_height_url" :params="processor_detail.filter_height"
+                      :key_params="'123456'"></row-slider>
                   </div>
                   <div class="row_layout" style="justify-content: start;">
                     <span class="module_text_style" style="margin-right: 8.5%;">类型</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <div class="option_box">
+                        <span v-show="processor_detail.filter_height.type==0"
+                          style="font-size: 12px;color: #ABCBFF;">贝塞尔</span>
+                        <span v-show="processor_detail.filter_height.type==1"
+                          style="font-size: 12px;color: #ABCBFF;">巴特沃斯</span>
+                        <span v-show="processor_detail.filter_height.type==2"
+                          style="font-size: 12px;color: #ABCBFF;">林克威治-瑞利</span>
+                        <img src="./img/icon2.png" style="width: 9px;height: 6px;"
+                          @mousedown="static_par.filter_height_type=!static_par.filter_height_type">
+                        <!-- 选项框 -->
+                        <div class="option_selcet" v-show="static_par.filter_height_type"
+                          style="height: 90px;grid-template-rows: repeat(3,1fr);bottom: -300%;">
+                          <img src="./img/显示数字背景框.png" class="input_bg">
+                          <span @mousedown="low_height_type(0,1)" style="font-size: 12px;color: #ABCBFF;">贝塞尔</span>
+                          <span @mousedown="low_height_type(1,1)" style="font-size: 12px;color: #ABCBFF;">巴特沃斯</span>
+                          <span @mousedown="low_height_type(2,1)" style="font-size: 12px;color: #ABCBFF;">林克威治-瑞利</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="row_layout">
                     <span class="module_text_style">斜率</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <div class="option_box">
+                        <span v-show="processor_detail.filter_height.slope==0"
+                          style="font-size: 12px;color: #ABCBFF;">-6dB/oct</span>
+                        <span v-show="processor_detail.filter_height.slope==1"
+                          style="font-size: 12px;color: #ABCBFF;">-12</span>
+                        <span v-show="processor_detail.filter_height.slope==2"
+                          style="font-size: 12px;color: #ABCBFF;">-18</span>
+                        <span v-show="processor_detail.filter_height.slope==3"
+                          style="font-size: 12px;color: #ABCBFF;">-24</span>
+                        <span v-show="processor_detail.filter_height.slope==4"
+                          style="font-size: 12px;color: #ABCBFF;">-36</span>
+                        <span v-show="processor_detail.filter_height.slope==5"
+                          style="font-size: 12px;color: #ABCBFF;">-48</span>
+                        <img src="./img/icon2.png" style="width: 9px;height: 6px;"
+                          @mousedown="static_par.filter_height_slope=!static_par.filter_height_slope">
+                        <!-- 选项框 -->
+                        <div class="option_selcet" v-show="static_par.filter_height_slope"
+                          style="height: 180px;grid-template-rows: repeat(6,1fr);bottom: -600%;">
+                          <img src="./img/显示数字背景框.png" class="input_bg">
+                          <span @mousedown="low_height_slope(0,1)"
+                            style="font-size: 12px;color: #ABCBFF;">-6dB/oct</span>
+                          <span @mousedown="low_height_slope(1,1)" style="font-size: 12px;color: #ABCBFF;">-12</span>
+                          <span @mousedown="low_height_slope(2,1)" style="font-size: 12px;color: #ABCBFF;">-18</span>
+                          <span @mousedown="low_height_slope(3,1)" style="font-size: 12px;color: #ABCBFF;">-24</span>
+                          <span @mousedown="low_height_slope(4,1)" style="font-size: 12px;color: #ABCBFF;">-36</span>
+                          <span @mousedown="low_height_slope(5,1)" style="font-size: 12px;color: #ABCBFF;">-48</span>
+                        </div>
+                      </div>
                     </div>
-                    <div class="button_style">直通</div>
+                    <div class="button_style" @mousedown="low_height_button(1)"
+                      :style="{boxShadow:processor_detail.filter_height.status==1?'':'none'}">直通</div>
                   </div>
-
                   <div class="col_line" style="right: 0;"></div>
                 </div>
-                <!-- 滤波右边 -->
+                <!-- 低通 -->
                 <div class="vertical" style="grid-area: d;width: 100%;height: 100%;">
                   <span style="font-size: 14px;color: #355CBB;">低通</span>
                   <div class="row_layout">
                     <span class="module_text_style" style="margin-right: 3.7%;">频率(Hz)</span>
                     <div class="input_box" style="margin-right: 6.5%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.filter_low.frequency}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.filter_height.frequency" :slider_max="'20000'"
+                      :slider_min="'20'" :token="resCommonParams.loginToken"
+                      @slider_num="processor_detail.filter_low.frequency=$event"
+                      :url_params="resCommonParams.push_low_height_url" :params="processor_detail.filter_low"
+                      :key_params="'123456'"></row-slider>
                   </div>
                   <div class="row_layout" style="justify-content: start;">
                     <span class="module_text_style" style="margin-right: 8.5%;">类型</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <div class="option_box">
+                        <span v-show="processor_detail.filter_low.type==0"
+                          style="font-size: 12px;color: #ABCBFF;">贝塞尔</span>
+                        <span v-show="processor_detail.filter_low.type==1"
+                          style="font-size: 12px;color: #ABCBFF;">巴特沃斯</span>
+                        <span v-show="processor_detail.filter_low.type==2"
+                          style="font-size: 12px;color: #ABCBFF;">林克威治-瑞利</span>
+                        <img src="./img/icon2.png" style="width: 9px;height: 6px;"
+                          @mousedown="static_par.filter_low_type=!static_par.filter_low_type">
+                        <!-- 选项框 -->
+                        <div class="option_selcet" v-show="static_par.filter_low_type"
+                          style="height: 90px;grid-template-rows: repeat(3,1fr);bottom: -300%;">
+                          <img src="./img/显示数字背景框.png" class="input_bg">
+                          <span @mousedown="low_height_type(0,0)" style="font-size: 12px;color: #ABCBFF;">贝塞尔</span>
+                          <span @mousedown="low_height_type(1,0)" style="font-size: 12px;color: #ABCBFF;">巴特沃斯</span>
+                          <span @mousedown="low_height_type(2,0)" style="font-size: 12px;color: #ABCBFF;">林克威治-瑞利</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="row_layout">
                     <span class="module_text_style">斜率</span>
                     <div class="input_box">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <div class="option_box">
+                        <span v-show="processor_detail.filter_low.slope==0"
+                          style="font-size: 12px;color: #ABCBFF;">-6dB/oct</span>
+                        <span v-show="processor_detail.filter_low.slope==1"
+                          style="font-size: 12px;color: #ABCBFF;">-12</span>
+                        <span v-show="processor_detail.filter_low.slope==2"
+                          style="font-size: 12px;color: #ABCBFF;">-18</span>
+                        <span v-show="processor_detail.filter_low.slope==3"
+                          style="font-size: 12px;color: #ABCBFF;">-24</span>
+                        <span v-show="processor_detail.filter_low.slope==4"
+                          style="font-size: 12px;color: #ABCBFF;">-36</span>
+                        <span v-show="processor_detail.filter_low.slope==5"
+                          style="font-size: 12px;color: #ABCBFF;">-48</span>
+                        <img src="./img/icon2.png" style="width: 9px;height: 6px;"
+                          @mousedown="static_par.filter_low_slope=!static_par.filter_low_slope">
+                        <!-- 选项框 -->
+                        <div class="option_selcet" v-show="static_par.filter_low_slope"
+                          style="height: 180px;grid-template-rows: repeat(6,1fr);bottom: -600%;">
+                          <img src="./img/显示数字背景框.png" class="input_bg">
+                          <span @mousedown="low_height_slope(0,0)"
+                            style="font-size: 12px;color: #ABCBFF;">-6dB/oct</span>
+                          <span @mousedown="low_height_slope(1,0)" style="font-size: 12px;color: #ABCBFF;">-12</span>
+                          <span @mousedown="low_height_slope(2,0)" style="font-size: 12px;color: #ABCBFF;">-18</span>
+                          <span @mousedown="low_height_slope(3,0)" style="font-size: 12px;color: #ABCBFF;">-24</span>
+                          <span @mousedown="low_height_slope(4,0)" style="font-size: 12px;color: #ABCBFF;">-36</span>
+                          <span @mousedown="low_height_slope(5,0)" style="font-size: 12px;color: #ABCBFF;">-48</span>
+                        </div>
+                      </div>
                     </div>
-                    <div class="button_style">直通</div>
+                    <div class="button_style" @mousedown="low_height_button(0)"
+                      :style="{boxShadow:processor_detail.filter_low.status==1?'':'none'}">直通</div>
                   </div>
                 </div>
               </div>
@@ -504,35 +768,48 @@
                     <span class="module_text_style" style="margin-right: 3.7%;">阈值(db)</span>
                     <div class="input_box" style="margin-right: 6.17%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.press_limit.threshold}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.press_limit.threshold" :slider_max="'0'" :slider_min="'-120'"
+                      :token="resCommonParams.loginToken" :key_params="'123456'"
+                      :url_params="resCommonParams.push_press_limit_url" :params="processor_detail.press_limit"
+                      @slider_num="processor_detail.press_limit.threshold=$event"></row-slider>
                   </div>
                   <div class="row_layout">
                     <span class="module_text_style" style="margin-right: 3.7%;">斜率</span>
                     <div class="input_box" style="margin-right: 6.17%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.press_limit.slope}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.press_limit.slope" :slider_max="'100'" :slider_min="'1'"
+                      :token="resCommonParams.loginToken" :key_params="'123456'"
+                      :url_params="resCommonParams.push_press_limit_url" :params="processor_detail.press_limit"
+                      @slider_num="processor_detail.press_limit.slope=$event"></row-slider>
                   </div>
                   <div class="row_layout">
                     <span class="module_text_style" style="margin-right: 3.7%;">启动时间(ms)</span>
                     <div class="input_box" style="margin-right: 6.17%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.press_limit.start_time}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.press_limit.start_time" :slider_max="'1000'"
+                      :slider_min="'20'" :token="resCommonParams.loginToken" :key_params="'123456'"
+                      :url_params="resCommonParams.push_press_limit_url" :params="processor_detail.press_limit"
+                      @slider_num="processor_detail.press_limit.start_time=$event"></row-slider>
                   </div>
                   <div class="row_layout">
                     <span class="module_text_style" style="margin-right: 3.7%;">恢复时间(ms)</span>
                     <div class="input_box" style="margin-right: 6.17%;">
                       <img src="./img/显示数字背景框.png" class="input_bg">
-                      <input v-model.number="static_par.temp" class="input_text">
+                      <span style="font-size: 12px;color: #abcbff;">{{processor_detail.press_limit.recover_time}}</span>
                     </div>
-                    <row-slider :channel="static_par.temp" :slider_max="'+12'" :slider_min="'-12'"></row-slider>
+                    <row-slider :channel="processor_detail.press_limit.recover_time" :slider_max="'1000'"
+                      :slider_min="'20'" :token="resCommonParams.loginToken" :key_params="'123456'"
+                      :url_params="resCommonParams.push_press_limit_url" :params="processor_detail.press_limit"
+                      @slider_num="processor_detail.press_limit.recover_time=$event"></row-slider>
                   </div>
-                  <div class="button_style">直通</div>
+                  <div class="button_style" @mousedown="press_limit_button"
+                    :style="{boxShadow:processor_detail.press_limit.status==1?'':'none'}">直通</div>
                 </div>
               </div>
             </div>
@@ -541,43 +818,44 @@
       </div>
       <div v-if="static_par.option_focus==3"
         style="grid-column-start: 1;grid-column-end: 3;grid-row-start: 1;grid-row-end: 3;">
-        <iframe src="./调音台dsp/index.html?" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
+        <iframe src="./调音台dsp/index.html?type=matrix2" frameborder="0" scrolling="no" width="100%"
+          height="100%"></iframe>
       </div>
       <!-- 混音前增益 -->
       <div class="mix_sound scroll_display" v-if="static_par.option_focus==4" @mousewheel="scroll_x($event)"
         ref="scroll_display">
-        <div class="single_slider_content" v-for="input,index in processor_detail.Channel_input_list">
-          <div class="slider_name">IN {{input.channel_no}}</div>
+        <div class="single_slider_content" v-for="gain,index in processor_detail.before_mix_gain">
+          <div class="slider_name">IN {{gain.channel_no}}</div>
           <div class="mix_sound_display">
             <!-- 反相 -->
-            <div @click="reverse_off(input)" class="soundOff">
-              <img :src="[input.temp_reverse==0?'./img/静音通常.png':'./img/静音.png']"
+            <div @click="reverse_off(gain)" class="soundOff">
+              <img :src="[gain.reverse_phase==0?'./img/静音通常.png':'./img/静音.png']"
                 style="position: absolute;width: 100%;height: 100%;">
-              <span :style="{fontSize: '12px',color:input.temp_reverse==0?'#ABCBFF':'#FFABCF',zIndex:'1'}">反相</span>
+              <span :style="{fontSize: '12px',color:gain.reverse_phase==0?'#ABCBFF':'#FFABCF',zIndex:'1'}">反相</span>
             </div>
             <!-- 静音 -->
-            <div @click="soundOff(input)" class="soundOff">
-              <img :src="[input.mute==0?'./img/静音通常.png':'./img/静音.png']"
+            <div @click="soundOff(gain)" class="soundOff">
+              <img :src="[gain.mute==0?'./img/静音通常.png':'./img/静音.png']"
                 style="position: absolute;width: 100%;height: 100%;">
-              <span :style="{fontSize: '12px',color:input.mute==0?'#ABCBFF':'#FFABCF',zIndex:'1'}">静音</span>
+              <span :style="{fontSize: '12px',color:gain.mute==0?'#ABCBFF':'#FFABCF',zIndex:'1'}">静音</span>
             </div>
             <!-- 输入框 -->
             <div class="slider_num">
-              <input @keyup.enter="command_send(input)" v-model.number="input.temp_input" maxlength="5"
+              <input @keyup.enter="command_send(gain)" v-model.number="gain.temp_input" maxlength="5"
                 class="slider_num_input">
               <span style="font-size: 12px;color: #ABCBFF;">dB</span>
             </div>
             <!-- 滑块 -->
             <div class="slider_box">
               <span class="slider_range">+12</span>
-              <div @mousedown="sliderTurnTo($event,input)" class="slider" ref="slider">
+              <div @mousedown="sliderTurnTo($event,gain)" class="slider" ref="slider">
                 <img src="./img/滑块小.png" style="width: 100%;height: 100%;position: absolute;">
                 <div class="slider_bar"></div>
-                <div :style="change_cover_height(input.gain)" class="slider_cover"></div>
-                <div :style="change_slider_bottom(input.gain)" @mousedown.stop="silderMove($event,input)"
+                <div :style="change_cover_height(gain.gain)" class="slider_cover"></div>
+                <div :style="change_slider_bottom(gain.gain)" @mousedown.stop="silderMove($event,gain)"
                   class="slider_img"></div>
               </div>
-              <span class="slider_range">-12</span>
+              <span class="slider_range">-70</span>
             </div>
           </div>
         </div>
@@ -585,31 +863,36 @@
       <!-- 预设 -->
       <div v-if="static_par.option_focus==5"
         style="grid-column-start: 1;grid-column-end: 3;grid-row-start: 1;grid-row-end: 3;">
-        <iframe src="./调音台dsp/index.html?type=matrix2" frameborder="0" scrolling="no" width="100%"
-          height="100%"></iframe>
+        <iframe src="./调音台dsp/index.html" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
       </div>
       <!-- 滑动条控制 -->
       <div v-show="static_par.option_focus!=3 & static_par.option_focus!=5" class="sliderControlContent">
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
-        <div class="controlContent">
+        <div class="controlContent" @mousewheel="scroll_input($event)" ref="controlContent_input">
           <single-slider v-for="input,index in processor_detail.Channel_input_list" :channel="input"
             :token="resCommonParams.loginToken" :in_title="'IN'" :out_title="'OUT'" :in_or_out="0" :slider_max="'+12'"
             :slider_min="'-12'" @channel_name_event="static_par.channel_name=$event"
             @option_focus="static_par.option_focus=$event"
             @noise_feedback_event="processor_detail.noise_and_feedback=$event"
-            @delay_press_limit_event="processor_detail.delay_press_limit=$event">
+            @delay_event="processor_detail.delay=$event" @press_limit_event="processor_detail.press_limit=$event"
+            @page_loading_event="total_page_loading=$event" @filter_height_event="processor_detail.filter_height=$event"
+            @filter_low_event="processor_detail.filter_low=$event"
+            @filter_peq_event="processor_detail.filter_peq=$event">
           </single-slider>
         </div>
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
       </div>
       <div v-show="static_par.option_focus!=3 & static_par.option_focus!=5" class="sliderControlContent">
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
-        <div class="controlContent">
+        <div class="controlContent" @mousewheel="scroll_output($event)" ref="controlContent_output">
           <single-slider v-for="output,index in processor_detail.Channel_output_list" :channel="output"
             :token="resCommonParams.loginToken" :in_title="'IN'" :out_title="'OUT'" :in_or_out="1" :slider_max="'+12'"
             :slider_min="'-12'" @channel_name_event="static_par.channel_name=$event"
-            @option_focus="static_par.option_focus=$event"
-            @delay_press_limit_event="processor_detail.delay_press_limit=$event">
+            @option_focus="static_par.option_focus=$event" @delay_event="processor_detail.delay=$event"
+            @press_limit_event="processor_detail.press_limit=$event" @page_loading_event="total_page_loading=$event"
+            @filter_height_event="processor_detail.filter_height=$event"
+            @filter_low_event="processor_detail.filter_low=$event"
+            @filter_peq_event="processor_detail.filter_peq=$event">
           </single-slider>
         </div>
         <img src="./img/装饰点.png" style="width: 19px;height: 18px;">
@@ -623,6 +906,7 @@
 <script src="./module/vue.js"></script>
 <script src="./module/element-ui.js"></script>
 <script src="./module/axios.min.js"></script>
+<script src="./main.js"></script>
 <script src="./vue_template.js"></script>
 <script src="./frequency.js"></script>
 
