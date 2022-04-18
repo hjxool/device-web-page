@@ -346,7 +346,7 @@ let sound = new Vue({
 	},
 	created: function () {
 		this.loginToken = window.sessionStorage.loginToken;
-		this.deviceId = '0x333333330000000000000000';
+		this.deviceId = '0x022222222200000000000000';
 		this.request('post', sound_console_url, { id: this.deviceId }, '74935343174538', this.loginToken, this.sound_console_detail);
 	},
 	methods: {
@@ -374,7 +374,7 @@ let sound = new Vue({
 						confirmButtonText: '确定',
 						callback: () => {
 							if (res.data.code == 3005 || res.data.code == 3006) {
-								window.location.href = '../test demo/login/login.html';
+								// window.location.href = '../test demo/login/login.html';
 							}
 						},
 					});
